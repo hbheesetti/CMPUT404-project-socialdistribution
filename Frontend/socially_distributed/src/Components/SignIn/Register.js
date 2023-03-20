@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Input, Panel, InputGroup, Message, useToaster } from "rsuite";
+import { Button, Input, Panel, InputGroup } from "rsuite";
 import EyeIcon from "@rsuite/icons/legacy/Eye";
 import EyeSlashIcon from "@rsuite/icons/legacy/EyeSlash";
 import axios from "axios";
@@ -10,24 +10,9 @@ function REGISTER() {
 	const [fullname, set_fullname] = useState("");
 	const [email, set_email] = useState("");
 	const [visible, setVisible] = React.useState(false);
-	let toaster = useToaster();
 
 	const handleChange = () => {
 		setVisible(!visible);
-	};
-
-	const notifySuccessPost = (message) => {
-		toaster.push(<Message type="success">{message}</Message>, {
-			placement: "topEnd",
-			duration: 5000,
-		});
-	};
-
-	const notifyFailedPost = (error) => {
-		toaster.push(<Message type="error">{error}</Message>, {
-			placement: "topEnd",
-			duration: 5000,
-		});
 	};
 
 	const handleSubmitClick = () => {
@@ -39,9 +24,9 @@ function REGISTER() {
 		};
 		axios({ method: "post", url: "register", data: params })
 			.then((res) => {
-				notifySuccessPost("Registration Successful");
+				console.log(res);
 			})
-			.catch((err) => notifyFailedPost(err));
+			.catch((err) => console.log(err));
 	};
 
 	return (

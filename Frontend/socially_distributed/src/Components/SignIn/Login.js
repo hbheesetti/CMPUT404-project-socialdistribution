@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Button, Input, Panel, InputGroup } from "rsuite";
 import EyeIcon from "@rsuite/icons/legacy/Eye";
 import EyeSlashIcon from "@rsuite/icons/legacy/EyeSlash";
 import axios from "axios";
 import {
-	getCsrfToken,
-	setCurrentUser,
+	setAxiosAuthToken,
+	setToken,
+	getCurrentUser,
 	setLoggedIn,
 	unsetCurrentUser,
 } from "../utils/auth";
@@ -19,32 +20,29 @@ function LOGIN() {
 	let navigate = useNavigate();
 
 	useEffect(() => {
-		if (localStorage.getItem("loggedIn")) {
-			navigate("/");
-		} else {
-			unsetCurrentUser();
-			getCsrfToken();
-		}
-	}, []);
+		unsetCurrentUser();
+	});
 
 	const handleChange = () => {
 		setVisible(!visible);
 	};
 
-	async function handleLoginClick() {
+	const handleLoginClick = () => {
 		var params = {
 			username: username,
 			password: password,
 		};
-
-		await axios({ method: "post", url: "login", data: params })
-			.then(async (res) => {
-				await setCurrentUser(res.data).then(navigate("/"));
-				getCsrfToken();
+		axios({ method: "post", url: "login", data: params })
+			.then((res) => {
+				// console.log(res);
+				setAxiosAuthToken(res.data["accessToken"]);
+				setToken(res.data["refreshToken"]);
+				getCurrentUser(res.data["author_id"]);
 				setLoggedIn(true);
+				navigate("/");
 			})
 			.catch((err) => console.log(err));
-	}
+	};
 
 	return (
 		<div>
