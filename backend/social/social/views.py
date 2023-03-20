@@ -14,6 +14,8 @@ from django.db import transaction, IntegrityError
 from django.contrib.auth.backends import AllowAllUsersModelBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 from social.serializers import UserSerializer
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
 
 class register(APIView):
     def post(self, request):
@@ -25,7 +27,7 @@ class register(APIView):
         try:
             user = User.objects.create_user(username=display_name, email=email, password=password)
             user.save()
-            url = 'http://127.0.0.1:8000/authors/authors/'+id_
+            url = "authors/" + id_
             author = Author(user=user, id = id_, displayName= display_name, url=url)
             author.save()
             return(Response(id_, status=status.HTTP_201_CREATED))
@@ -44,15 +46,24 @@ class login(APIView):
         user = auth.authenticate(request=request, username=username, password= password)
 
         author= Author.objects.filter(displayName=username)[0]
-        print(author.id)
-        refresh = RefreshToken.for_user(author)
-        access = refresh.access_token
 
         params = {}
         # params['user'] = UserSerializer(user)
-        params['author_id'] = author.id
-        params['refreshToken'] = str(refresh)
-        params['accessToken'] = str(access)
+        # params['token'] = get_token()
+        params = AuthorSerializer(author)
+
         if not user:
             return Response("user not registered", status=status.HTTP_401_UNAUTHORIZED)
-        return Response(params, status=status.HTTP_202_ACCEPTED)
+        return Response(params.data, status=status.HTTP_202_ACCEPTED)
+    
+
+def csrf(request):
+    return JsonResponse({'csrfToken': get_token(request)})
+    
+class logout(APIView):
+    def post(self, request):
+        """deals with user auth"""
+        auth = AllowAllUsersModelBackend()
+        
+        user = auth.logout(request=request)
+        return Response( status=status.HTTP_202_ACCEPTED)
