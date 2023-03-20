@@ -156,7 +156,7 @@ class post_list(APIView, PageNumberPagination):
         serializer = PostSerializer(posts, many=True)
         return self.get_paginated_response(serializer.data)
 
-    @swagger_auto_schema(responses=response_schema_dictposts,operation_summary="Create a new Post for an Author")
+    @swagger_auto_schema(responses=response_schema_dictposts,operation_summary="Create a new Post for an Author",request_body=openapi.Schema( type=openapi.TYPE_STRING,description='A raw text input for the POST request'))
 
     def post(self, request, pk_a):
         """
