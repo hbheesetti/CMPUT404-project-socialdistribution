@@ -2,9 +2,8 @@ from django.db import models
 from django.urls import reverse
 from author.models import Author, Inbox
 from django.contrib.contenttypes.fields import GenericRelation
+from django.utils import timezone
 import uuid
-from django.conf import settings
-
 
 # Create your models here.
 
@@ -36,18 +35,16 @@ class Post(models.Model):
     author = models.ForeignKey(Author, related_name="posts", on_delete=models.CASCADE)  # author of post
     categories = models.CharField(max_length=255, default="", blank=True)
     title = models.CharField(max_length=150)  # title of post
-    source = models.URLField(editable=False,max_length=500)  # source of post IE the url of where the post is located
-    origin = models.URLField(editable=False,max_length=500)  # origin of post IE the url of where the originl post is located if shared.
+    # source = models.URLField(default="",max_length=500)  # source of post
+    # origin = models.URLField(default="",max_length=500)  # origin of post
     description = models.CharField(blank=True, default="", max_length=200)  # brief description of post
     contentType = models.CharField(choices=content_types, default=PLAIN, max_length=20)  # type of content
     content = models.TextField(blank=False, default="")  # content of post
     visibility = models.CharField(choices=visbility_choices, default=PUBLIC, max_length=20)  # visibility status of post
     inbox = GenericRelation(Inbox, related_query_name='post')  # inbox in which post is in
     published = models.DateTimeField(auto_now_add=True)  # date published
-    count = models.PositiveIntegerField(default=0, blank=True)
-    commentsSrc = models.CharField(max_length=255, default="", blank=True)
     
-    image = models.ImageField(null=True,blank=True, default="")  # reference to an image in the DB
+    image = models.ImageField(null=True,blank=True)  # reference to an image in the DB
 
     # make it pretty
     def __str__(self):
@@ -63,8 +60,7 @@ class Post(models.Model):
 
     # get public id of post
     def get_public_id(self):
-        self.get_absolute_url()
-        return (self.url) or str(self.id)
+        return self.url or str(self.id)
     
     # get comments url
     def get_comments_source(self):
@@ -72,7 +68,10 @@ class Post(models.Model):
             return self.url + 'comments/'
         else:
             return self.url + '/comments/'
-        
+    
+    def get_comment_count(self):
+        return self.comments.count()
+
     def get_likes_count(self):
         return self.likes.count()
     
@@ -84,83 +83,49 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         url = reverse('posts:detail', args=[str(self.author.id), str(self.id)])
-        url = settings.APP_NAME + url
-        self.url = url[:-1] if url.endswith('/') else url 
-        self.save()
-        return self.url
-
-    def get_source(self):
-        #set post source (URL to source)
-        return self.url
-        
-    def get_origin(self):
-        #set post origin (URL to origin)
-        return self.url
+        return url[:-1] if url.endswith('/') else url 
     
     @staticmethod
     def get_api_type():
         return 'post'
-    
-    class Meta:
-        ordering = ['published']
-        
+
 class Comment(models.Model):
     id = models.CharField(primary_key=True, editable=False, default= uuid.uuid4, max_length=255)  # ID of comment
     url = models.URLField(editable=False, max_length=500)  # URL of comment
     author = models.ForeignKey(Author, related_name = 'comments', on_delete=models.CASCADE)  # author of comment
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)  # post of the commenT
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)  # post of the commen
     comment = models.TextField()  # the comment
     published = models.DateTimeField(auto_now_add=True)  # date published
     contentType = models.CharField(choices=content_types, default=PLAIN, max_length=20)  # type of content
-    inbox = GenericRelation(Inbox, related_query_name='comment')  # inbox in which post is in
-    
 
     # get public id of comment
     def get_public_id(self):
-        if not self.url: 
-            self.url = settings.APP_NAME + self.get_absolute_url()
-            self.save()
-        return (self.url) + "/" + str(self.id) or str(self.id)
-    
-    def get_absolute_url(self):
-        url = reverse('posts:comments', args=[str(self.post.author.id), str(self.post.id)])
-        return url[:-1] if url.endswith('/') else url 
+        return self.url or self.id
     
     @staticmethod
     def get_api_type():
         return 'comment'
     
     class Meta:
-        ordering = ['-published']
+        ordering = ['published']
 
     def __str__(self):
         return 'Comment by {}'.format(self.author)
     
 class Like(models.Model):
     id = models.CharField(primary_key=True, editable=False, default= uuid.uuid4, max_length=255)  # ID of like
-    summary = models.CharField (max_length=100, default='')
+    summary = models.CharField (max_length=100)
     author = models.ForeignKey(Author, related_name = 'likes', on_delete=models.CASCADE)  # author of like
     object = models.URLField(max_length=500)  # URL of liked object
     inbox = GenericRelation(Inbox, related_query_name='like')  # inbox in which like is in
 
     # get public id of like
     def get_public_id(self):
-        if not self.url: 
-            self.url = settings.APP_NAME + self.get_absolute_url()
-            self.save()
-        return (self.url) or str(self.id)
-
-    def get_summary(self):
-        return self.author.displayName + " Likes your post"
-
+        return self.url or self.id
+    
     @staticmethod
     def get_api_type():
         return 'Like'
-    
-    def __str__(self):
-        return 'Liked by {}'.format(self.author)
-    
-    ### HOW TO CONTRAINT HOW MANY TIMES AN AUTHOR LIKES AN IMAGEike'
     
     def __str__(self):
         return 'Liked by {}'.format(self.author)
