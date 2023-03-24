@@ -994,8 +994,6 @@ class PublicPostsView(APIView):
 def share_object(item, author, shared_user):
     inbox_item = Inbox(content_object=item, author=author)
     inbox_item.save()
-    # TODO: refactor once auth is set up
-    authenticated_user = "joe"
 
     # public post (send to all inboxes)
     if (item.visibility == 'PUBLIC'):
@@ -1009,9 +1007,9 @@ def share_object(item, author, shared_user):
             inbox_item = Inbox(content_object=item, author=friend)
             inbox_item.save()
 
-    # unlisted post (send only to own inbox)
+    # unlisted post (send only to author's inbox)
     if (item.visibility == 'UNLISTED'):
-        if author == authenticated_user:
+        if author:
             inbox_item = Inbox(content_object=item, author=author)
             inbox_item.save()
 
