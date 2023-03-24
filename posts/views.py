@@ -503,6 +503,7 @@ class post_list(APIView, PageNumberPagination):
         Request: include mandatory fields of a post, not including author, id, origin, source, type, count, comments, commentsSrc, published
         """
         pk = str(uuid.uuid4())
+        
         try:
             author = Author.objects.get(pk=pk_a)
         except Author.DoesNotExist:
