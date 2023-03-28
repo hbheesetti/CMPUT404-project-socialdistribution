@@ -65,7 +65,7 @@ function INBOX() {
 	};
 
 	async function handleLogoutClick() {
-		reqInstance.post("dlogout/").then((res) => {
+		reqInstance.post("logout/").then((res) => {
 			if (res.status === 200) {
 				unsetCurrentUser();
 				navigate("/signin");

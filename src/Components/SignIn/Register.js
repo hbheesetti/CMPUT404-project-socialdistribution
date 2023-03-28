@@ -40,7 +40,7 @@ function REGISTER() {
 		};
 		getCsrfToken();
 
-		reqInstance({ method: "post", url: "dregister", data: params })
+		reqInstance({ method: "post", url: "register", data: params })
 			.then((res) => {
 				notifySuccessPost("Registration Successful");
 			})
