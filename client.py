@@ -2,34 +2,34 @@ import requests
 import base64
 from requests.auth import HTTPBasicAuth
 
-def getNodeAuthors_social_distro():
+# def getNodeAuthors_social_distro():
 
-    #https://social-distro.herokuapp.com/api/authors/15/
-    url = 'https://social-distro.herokuapp.com/api/authors/'
+#     #https://social-distro.herokuapp.com/api/authors/15/
+#     url = 'https://social-distro.herokuapp.com/api/authors/'
 
-    username = 'remote1'
-    password = 'r3mot31'
-    #remote1:r3mot31
-    credentials = f'{username}:{password}'
-    encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
-    authorization_header = f'Basic {encoded_credentials}'
-    headers = {'Authorization': authorization_header}
+#     username = 'remote1'
+#     password = 'r3mot31'
+#     #remote1:r3mot31
+#     credentials = f'{username}:{password}'
+#     encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
+#     authorization_header = f'Basic {encoded_credentials}'
+#     headers = {'Authorization': authorization_header}
 
-    response = requests.get(url, headers=headers)
+#     response = requests.get(url, headers=headers)
    
-    status_code = response.status_code
-    json_response = response.json()
-    authors = json_response['results']
-    return authors
+#     status_code = response.status_code
+#     json_response = response.json()
+#     authors = json_response['results']
+#     return authors
 
 
 def getNodeAuthors_App2():
     #https://social-distro.herokuapp.com/api/authors/15/
-    url = 'https://social-distro.herokuapp.com/api/authors/'
-    hosturl = 'https://social-distro.herokuapp.com/'
+    url = 'https://killme.herokuapp.com/authors/'
+    hosturl = 'https://killme.herokuapp.com/'
 
-    username = 'remote1'
-    password = 'r3mot31'
+    username = 'app1team15'
+    password = 'hari1234'
     #remote1:r3mot31
 
     session = requests.Session()
@@ -130,11 +130,11 @@ def getNodePost_Yoshi(author_id):
 
 def getNodePost_app2(author_id):
     url = 'https://killme.herokuapp.com/posts/authors/'
-    hosturl = 'https://social-distro.herokuapp.com/'
+    hosturl = 'https://killme.herokuapp.com/'
 
     url = url + author_id + '/posts/'
     username = 'app1team15'
-    password = 'password'
+    password = 'hari1234'
     #remote1:r3mot31
 
     session = requests.Session()
