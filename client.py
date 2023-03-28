@@ -23,7 +23,7 @@ def getNodeAuthors_social_distro():
     return authors
 
 
-def getNodeApp2():
+def getNodeAuthors_App2():
     #https://social-distro.herokuapp.com/api/authors/15/
     url = 'https://social-distro.herokuapp.com/api/authors/'
     hosturl = 'https://social-distro.herokuapp.com/'
@@ -48,7 +48,6 @@ def getNodeApp2():
     #status_code = response.status_code
     json_response = response.json()
     authors = json_response['results']
-    print(authors)
     return authors
 
 getNodeApp2()
