@@ -31,8 +31,11 @@ export const unsetCurrentUser = () => {
 
 export async function getCurrentUser(author_id) {
 	if (!localStorage.getItem("user")) {
-		return await axios
-			.get(`authors/${author_id}`)
+		return await axios({
+			method: "get",
+			url: `authors/${author_id}`,
+			baseURL: `https://sociallydistributed.herokuapp.com/`,
+		})
 			.then((response) => {
 				const user = response.data;
 				setCurrentUser(user);
@@ -45,7 +48,7 @@ export async function getCurrentUser(author_id) {
 
 export async function getCsrfToken() {
 	let _csrfToken = null;
-	const API_HOST = "http://127.0.0.1:8000";
+	const API_HOST = "https://sociallydistributed.herokuapp.com";
 	if (_csrfToken === null) {
 		const response = await fetch(`${API_HOST}/csrf/`, {
 			credentials: "include",
@@ -64,6 +67,7 @@ export function getAuthorId(a_id) {
 		const author = JSON.parse(localStorage.getItem("user"));
 		author_id = author.id.slice(author.id.length - len, author.id.length);
 	} else {
+		console.log(author_id);
 		author_id = a_id.slice(a_id.length - len, a_id.length);
 	}
 	return author_id;
@@ -71,7 +75,9 @@ export function getAuthorId(a_id) {
 
 export const getProfileImageUrl = () => {
 	const user = JSON.parse(localStorage.getItem("user"));
-	return user.profileImage;
+	if (localStorage.getItem("loggedIn")) {
+		return user.profileImage;
+	}
 };
 
 export const setCreds = (obj) => {

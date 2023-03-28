@@ -19,10 +19,14 @@ function EXPLORE() {
 	// Get the inbox
 	useEffect(() => {
 		if (!localStorage.getItem("loggedIn")) {
-			navigate("/login");
+			navigate("/signin");
 		} else {
-			const url = `posts/public/`;
-			reqInstance({ method: "get", url: url }).then((res) => {
+			const url = `posts/public`;
+			reqInstance({
+				method: "get",
+				url: url,
+				params: { local: true },
+			}).then((res) => {
 				console.log(res);
 				setInbox(res.data);
 			});
@@ -31,16 +35,7 @@ function EXPLORE() {
 
 	const item = (obj) => {
 		if (obj.type === "post") {
-			return <POST key={obj.id} postobj={obj} />;
-		}
-		if (obj.type === "Like") {
-			return <LIKEINBOX key={obj.id} likeobj={obj} />;
-		}
-		if (obj.type === "Follow") {
-			return <FOLLOWREQ key={obj.id} obj={obj} />;
-		}
-		if (obj.type === "comment") {
-			return <COMMENTINBOX key={obj.id} obj={obj} />;
+			return <POST key={obj.id} postobj={obj} explore={false} />;
 		}
 	};
 
@@ -60,9 +55,9 @@ function EXPLORE() {
 
 	async function handleLogoutClick() {
 		reqInstance.post("dlogout/").then((res) => {
-			if (res.status === 200) {
+			if (res.status === 202) {
 				unsetCurrentUser();
-				navigate("/login");
+				navigate("/signinn");
 			}
 		});
 	}
@@ -75,6 +70,10 @@ function EXPLORE() {
 		setOpen(false);
 	};
 
+	const handleInboxClick = () => {
+		navigate("/");
+	};
+
 	return (
 		<div style={{ padding: "10px", width: "60%", margin: "auto" }}>
 			<Navbar>
@@ -83,7 +82,10 @@ function EXPLORE() {
 					<Nav.Item onClick={handleLogoutClick}>Logout</Nav.Item>
 				</Nav>
 				<Nav pullRight>
-					<Nav.Menu title="Inbox"></Nav.Menu>
+					<Nav.Menu
+						onClick={handleInboxClick}
+						title="Inbox"
+					></Nav.Menu>
 				</Nav>
 				<Nav pullRight>
 					<Nav.Item onClick={handleProfileClick}>Profile</Nav.Item>

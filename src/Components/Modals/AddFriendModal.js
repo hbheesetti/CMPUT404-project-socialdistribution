@@ -50,9 +50,8 @@ function ADD_FRIEND_MODAL({ open, handleClose }) {
 		// reqInstance({ method: "put", url: url });
 		const url = `authors/displayName/${displayName}/`;
 		await reqInstance({ method: "get", url: url }).then(async (res) => {
-			if (res.status === 200) {
-				await sendreq(res.data.id);
-			}
+			console.log(res.data);
+			await sendreq(res.data.id);
 		});
 		handleClose();
 	}

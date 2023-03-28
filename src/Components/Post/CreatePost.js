@@ -15,7 +15,7 @@ import { getAuthorId } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 import PROFILEIMAGE from "../Profile/ProfileImage";
 
-function CREATEPOST() {
+function CREATEPOST({ refresh }) {
 	const [post_status, set_post_status] = useState("PUBLIC");
 	const [post_type, set_post_type] = useState("text/plain");
 	const [text, setText] = useState("");
@@ -24,13 +24,9 @@ function CREATEPOST() {
 	const [categories, setCategories] = useState("");
 	const [disabled, setDisabled] = useState(true);
 	const [markdown, setMarkdown] = useState("");
-	const [authors, setAuthors] = useState({ items: [] });
+	const [authors, setAuthors] = useState([]);
 	let navigate = useNavigate();
 	const toaster = useToaster();
-	const data = friends.items.map((item) => ({
-		label: item["displayName"],
-		value: item["displayName"],
-	}));
 	const [image64, set_image64] = useState("");
 	const [data, setData] = useState([]);
 
@@ -45,10 +41,10 @@ function CREATEPOST() {
 
 	useLayoutEffect(() => {
 		if (!localStorage.getItem("loggedIn")) {
-			navigate("/login");
+			navigate("/signin");
 		} else {
 			const AUTHOR_ID = getAuthorId(null);
-			const url = `authors/${AUTHOR_ID}/followers/`;
+			const url = `authors/${AUTHOR_ID}/followers`;
 			reqInstance({
 				method: "get",
 				url: url,
@@ -56,7 +52,7 @@ function CREATEPOST() {
 				setData(
 					res.data.items.map((item) => ({
 						label: item["displayName"],
-						value: item["displayName"],
+						value: getAuthorId(item["id"]),
 					}))
 				);
 			});
@@ -156,13 +152,13 @@ function CREATEPOST() {
 	async function readFileAsDataURL(file) {
 		return new Promise((resolve) => {
 			let fileReader = new FileReader();
-			fileReader.onloadend = (e) => resolve(set_image64(fileReader.result));
+			fileReader.onloadend = (e) =>
+				resolve(set_image64(fileReader.result));
 			fileReader.readAsDataURL(file);
 		});
-
 	}
 
-	async function handlePostClick () {
+	async function handlePostClick() {
 		const author = JSON.parse(localStorage.getItem("user"));
 		const author_id = getAuthorId(null);
 		const url = `posts/authors/${author_id}/posts/`;
@@ -173,11 +169,11 @@ function CREATEPOST() {
 			content: text,
 			contentType: post_type,
 			visibility: post_status,
+			authors: [],
 		};
 
-		if (post_status === 'PRIVATE') {
-			params['authors'] = authors;
-
+		if (post_status === "PRIVATE") {
+			params["authors"] = authors;
 		}
 		var imagefile = "";
 		if (post_type === "image/png" || post_type === "image/jpeg") {
@@ -197,7 +193,6 @@ function CREATEPOST() {
 		reqInstance({ method: "post", url: url, data: params })
 			.then((res) => {
 				if (res.status === 200) {
-					notifySuccessPost();
 					setText("");
 					setDescription("");
 					setTitle("");
@@ -205,12 +200,15 @@ function CREATEPOST() {
 					set_post_status("PUBLIC");
 					set_post_type("text/plain");
 					setMarkdown("");
+					setAuthors([]);
+					window.location.reload();
+					notifySuccessPost();
 				} else {
 					notifyFailedPost(res.data);
 				}
 			})
 			.catch((err) => console.log(err));
-	};
+	}
 
 	return (
 		<div
@@ -257,7 +255,9 @@ function CREATEPOST() {
 					data={data}
 					disabled={disabled}
 					valeu={authors}
-					onChange={(e) => setAuthors(e)}
+					onChange={(e) => {
+						setAuthors(e);
+					}}
 				/>
 			</>
 

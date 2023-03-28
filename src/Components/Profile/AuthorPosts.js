@@ -15,7 +15,7 @@ function AUTHORPOSTS() {
 
 	useEffect(() => {
 		if (!localStorage.getItem("loggedIn")) {
-			navigate("/login");
+			navigate("/signin");
 		} else {
 			const author_id = getAuthorId(null);
 			const url = `posts/authors/${author_id}/posts/`;
@@ -49,7 +49,7 @@ function AUTHORPOSTS() {
 				bordered
 				collapsible
 			>
-				<POST postobj={obj} edit={true}></POST>
+				<POST postobj={obj} edit={true} explore={true}></POST>
 			</Panel>
 		);
 	};

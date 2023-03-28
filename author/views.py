@@ -11,7 +11,7 @@ from django.urls import reverse,reverse_lazy
 from django.views import generic
 from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from author.pagination import *
+from .pagination import *
 from posts.serializers import *
 from .models import *
 from .serializers import *
@@ -262,7 +262,7 @@ class AuthorView(APIView):
                     return Response(author_json)
                 # get social distro's authors and format their data to our style
                 else:
-                    author_json, status_code = getNodeAuthor_social_distro(pk_a)
+                    author_json, status_code = getNodeAuthor_app2(pk_a)
                     if status_code == 200:
                         # formatting (theirs is nonetype while ours is empty string)
                         if author_json['profileImage'] == None:
@@ -337,11 +337,11 @@ class FollowersView(APIView):
                     return Response(error_msg, status=status.HTTP_404_NOT_FOUND) 
                 followers_list.append(AuthorSerializer(follower_author).data)
 
-            results = {"type": "followers",
+            items = {"type": "followers",
                     "items": followers_list
             }
 
-            return Response(results, status=200)
+            return Response(items, status=200)
         # else If url is /authors/authors/author_id/followers/foreign_author_id    
         # add foreign followers to the list of followers
         else:

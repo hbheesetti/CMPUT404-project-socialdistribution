@@ -7,16 +7,17 @@ import PROFILEIMAGE from "../Profile/ProfileImage";
 function FOLLOWREQ({ obj }) {
 	const [follow, setFollow] = useState(obj);
 	const toaster = useToaster();
+	const [accepted, setAccepted] = useState(false);
 
 	async function acceptFriend() {
 		const curr_author_id = getAuthorId(null);
 		var FAID = getAuthorId(obj.actor.id);
 		const url2 = obj;
 
-		const params = {};
+		const params = { accepted: accepted };
 		const url = `authors/${curr_author_id}/followers/${FAID}/`;
 
-		reqInstance({ method: "put", url: url, data: params })
+		return reqInstance({ method: "put", url: url, data: params })
 			.then((res) => {
 				toaster.push(
 					<Message type="success">
@@ -36,6 +37,19 @@ function FOLLOWREQ({ obj }) {
 			});
 	}
 
+	async function fredreq() {
+		setAccepted(true);
+		await acceptFriend();
+	}
+
+	const getUrl = () => {
+		if (follow["actor"]["profileImage"] === "") {
+			return "https://i.imgur.com/J95WCOD.jpg";
+		} else {
+			return follow["actor"]["profileImage"];
+		}
+	};
+
 	return (
 		<Panel
 			bordered
@@ -47,7 +61,7 @@ function FOLLOWREQ({ obj }) {
 				<Avatar
 					style={{ float: "left", marginBotton: "5px" }}
 					circle
-					src={follow["actor"]["profileImage"]} //{follow[actor][profileImage]} replace this with the actors profile image url
+					src={getUrl()} //{follow[actor][profileImage]} replace this with the actors profile image url
 				/>
 				<div
 					style={{
@@ -62,10 +76,13 @@ function FOLLOWREQ({ obj }) {
 			</div>
 
 			<div style={{ marginTop: "10px" }}>
-				<Button block onClick={acceptFriend} appearance="primary">
+				<Button block onClick={fredreq} appearance="primary">
 					Accept
 				</Button>
-				<Button block>Deny</Button>
+				<Button block>
+					{/* onClick={fredreq}> */}
+					Deny
+				</Button>
 			</div>
 		</Panel>
 	);
