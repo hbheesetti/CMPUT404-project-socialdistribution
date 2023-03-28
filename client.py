@@ -129,7 +129,7 @@ def getNodePost_Yoshi(author_id):
     else: return (None, status_code)
 
 def getNodePost_app2(author_id):
-    url = 'https://killme.herokuapp.com/authors/'
+    url = 'https://killme.herokuapp.com/posts/authors/'
     hosturl = 'https://social-distro.herokuapp.com/'
 
     url = url + author_id + '/posts/'
