@@ -50,8 +50,6 @@ def getNodeAuthors_App2():
     authors = json_response['results']
     return authors
 
-getNodeApp2()
-
 def getNodeAuthors_Yoshi():
     url = 'https://yoshi-connect.herokuapp.com/authors'
     #base64encoded username: minion and password: minion
