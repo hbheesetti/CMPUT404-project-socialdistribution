@@ -24,35 +24,32 @@ def getNodeAuthors_social_distro():
 
 
 def getNodeApp2():
-    url = 'http://killme.herokuapp.com/authors/'
-    hosturl = "http://killme.herokuapp.com/"
-    #base64encoded username: minion and password: minion
-    # authorization = 'minion:minion'
-    # encoded_authorization = base64.b64encode(authorization.encode("utf-8"))
-    # authroization_header = 'Basic ' + encoded_authorization
-    # headers = {'Authorization': authroization_header}
-    # #remote1:r3mot31
-    # credentials = f'{username}:{password}'
-    # encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
-    # authorization_header = f'Basic {encoded_credentials}'
-    # headers = {'Authorization': authorization_header}
-    username = 'app1team15'
-    password = 'hari1234'
+    #https://social-distro.herokuapp.com/api/authors/15/
+    url = 'https://social-distro.herokuapp.com/api/authors/'
+    hosturl = 'https://social-distro.herokuapp.com/'
+
+    username = 'remote1'
+    password = 'r3mot31'
+    #remote1:r3mot31
+
     session = requests.Session()
     session.auth = (username, password)
 
     auth = session.post(hosturl)
     response = session.get(url)
 
-    # basic = HTTPBasicAuth(username, password)
+    # credentials = f'{username}:{password}'
+    # encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
+    # authorization_header = f'Basic {encoded_credentials}'
+    # headers = {'Authorization': authorization_header}
 
-    # response = requests.get(url, basic)
-    status_code = response.status_code
-    print(response)
+    # response = requests.get(url, headers=headers)
+   
+    #status_code = response.status_code
     json_response = response.json()
     authors = json_response['results']
     print(authors)
-    return 
+    return authors
 
 getNodeApp2()
 
