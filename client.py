@@ -143,13 +143,13 @@ def getNodePost_app2(author_id):
     auth = session.post(hosturl)
     response = session.get(url)
     
-    credentials = f'{username}:{password}'
-    encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
-    authorization_header = f'Basic {encoded_credentials}'
-    headers = {'Authorization': authorization_header}
+    # credentials = f'{username}:{password}'
+    # encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
+    # authorization_header = f'Basic {encoded_credentials}'
+    # headers = {'Authorization': authorization_header}
 
-    response = requests.get(url, headers=headers)
-    #response = requests.get(url)
+    # response = requests.get(url, headers=headers)
+    #  response = requests.get(url)
     status_code = response.status_code
     if status_code == 200:
         json_response = response.json()
