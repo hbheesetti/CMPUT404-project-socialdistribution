@@ -135,6 +135,13 @@ def getNodePost_app2(author_id):
     username = 'app1team15'
     password = 'password'
     #remote1:r3mot31
+
+    session = requests.Session()
+    session.auth = (username, password)
+
+    auth = session.post(hosturl)
+    response = session.get(url)
+    
     credentials = f'{username}:{password}'
     encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
     authorization_header = f'Basic {encoded_credentials}'
