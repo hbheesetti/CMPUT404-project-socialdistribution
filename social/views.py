@@ -67,7 +67,6 @@ class dlogin(APIView):
         username = request.data['username']
         password = request.data['password']
         auth = AllowAllUsersModelBackend()
-        print("1")
     
         user = auth.authenticate(request=request, username=username, password= password)
         if user:
@@ -78,7 +77,6 @@ class dlogin(APIView):
         if user.is_active == True:
             author= Author.objects.filter(displayName=username)[0]
             params = AuthorSerializer(author)
-            print(params.data)
             return Response(params.data, status=status.HTTP_202_ACCEPTED)
         else:
             return Response("user needs to wait for approval from a server admin", status=status.HTTP_401_UNAUTHORIZED)
@@ -89,6 +87,7 @@ def csrf(request):
 # class logout(APIView):
 @authentication_classes([])
 @permission_classes([])
-def logout_view(request):
-    logout(request)
-    return Response( status=status.HTTP_202_ACCEPTED)
+class logoutView(APIView):
+    def post(self,request):
+        logout(request)
+        return Response( status=status.HTTP_202_ACCEPTED)

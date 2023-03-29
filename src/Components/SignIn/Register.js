@@ -39,10 +39,13 @@ function REGISTER() {
 			email: email,
 		};
 		getCsrfToken();
-
 		reqInstance({ method: "post", url: "register", data: params })
 			.then((res) => {
-				notifySuccessPost("Registration Successful");
+				if (res.status === 201) {
+					notifySuccessPost("Registration Successful");
+				} else {
+					notifyFailedPost("failed");
+				}
 			})
 			.catch((err) => notifyFailedPost(err));
 	};

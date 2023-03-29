@@ -63,8 +63,8 @@ function PROFILE() {
 	};
 
 	async function handleLogoutClick() {
-		reqInstance.post("accounts/logout/").then((res) => {
-			if (res.status === 200) {
+		reqInstance.post("dlogout/").then((res) => {
+			if (res.status === 202) {
 				navigate("/signin");
 			}
 		});

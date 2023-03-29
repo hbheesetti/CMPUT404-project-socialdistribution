@@ -44,7 +44,7 @@ function CREATEPOST({ refresh }) {
 			navigate("/signin");
 		} else {
 			const AUTHOR_ID = getAuthorId(null);
-			const url = `authors/${AUTHOR_ID}/followers/`;
+			const url = `authors/${AUTHOR_ID}/followers`;
 			reqInstance({
 				method: "get",
 				url: url,
