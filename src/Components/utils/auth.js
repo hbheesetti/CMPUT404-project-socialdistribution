@@ -19,7 +19,6 @@ export const setToken = (token) => {
 };
 
 export async function setCurrentUser(user) {
-	console.log(user);
 	return localStorage.setItem("user", JSON.stringify(user));
 }
 
@@ -32,11 +31,8 @@ export const unsetCurrentUser = () => {
 
 export async function getCurrentUser(author_id) {
 	if (!localStorage.getItem("user")) {
-		return await axios({
-			method: "get",
-			url: `authors/${author_id}`,
-			baseURL: `https://sociallydistributed.herokuapp.com/`,
-		})
+		return await axios
+			.get(`authors/${author_id}`)
 			.then((response) => {
 				const user = response.data;
 				setCurrentUser(user);

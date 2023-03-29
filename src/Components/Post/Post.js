@@ -16,9 +16,9 @@ import { reqInstance } from "../utils/axios";
 import PROFILEIMAGE from "../Profile/ProfileImage";
 // Component Imports
 
-function POST({ postobj, edit, explore }) {
+function POST({ postobj, edit }) {
 	const [post, set_post] = useState(postobj);
-	const [likes, setLikes] = useState({ items: [] });
+	const [likes, setLikes] = useState(({ items: [] }));
 	const [open, setOpen] = useState(false);
 	const toaster = useToaster();
 	let navigate = useNavigate();
@@ -154,8 +154,6 @@ function POST({ postobj, edit, explore }) {
 		</div>
 	);
 
-	const likesmodal = <LIKESMODAL postobj={postobj} />;
-
 	return (
 		<div>
 			<Panel
@@ -197,7 +195,9 @@ function POST({ postobj, edit, explore }) {
 				obj={postobj}
 				handleClose={handleModalClose}
 			/>
-			{explore ? likesmodal : <div />}
+			<LIKESMODAL
+				postobj={postobj}
+			/>
 		</div>
 	);
 }

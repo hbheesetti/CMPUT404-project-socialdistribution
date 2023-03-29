@@ -15,8 +15,10 @@ function COMMENTLIKE({ obj }) {
 		const curr_author_id = getAuthorId(null);
 		var FAID = "";
 		const url2 = obj;
+		
 
 		await reqInstance({ method: "get", url: url2 + "/" }).then((res) => {
+			console.log(res.data.author);
 			FAID = getAuthorId(res.data.author.id);
 		});
 

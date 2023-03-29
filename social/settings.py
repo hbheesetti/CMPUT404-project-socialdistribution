@@ -32,6 +32,8 @@ SECRET_KEY = '(e42^@_2fo+3!4%3y9t@50j#)ljo8+7r3_6e$z*p960-1-+g@y'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+APPEND_SLASH = True
+
 # Application definition
 INSTALLED_APPS = [
     'serveradmin.apps.ServeradminConfig',
@@ -48,22 +50,19 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework_swagger',
 ]
-APPEND_SLASH=True
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'django.middleware.common.CommonMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'social.middleware.CommonMiddlewareAppendSlashWithoutRedirect',
-    'author.middleware.CommonMiddlewareAppendSlashWithoutRedirect',
-    'posts.middleware.CommonMiddlewareAppendSlashWithoutRedirect',
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
- 
+
 STATIC_URL = 'static/'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATICFILES_DIRS = [
@@ -94,21 +93,9 @@ TEMPLATES = [
 ]
 ALLOWED_HOSTS = ['*']
 WSGI_APPLICATION = 'social.wsgi.application'
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', "http://127.0.0.1:8000/", "http://localhost:8000"]
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000/', "http://127.0.0.1:8000/", "http://localhost:8000"]
 CORS_ORIGIN_WHITELIST = ['http://localhost:3000', 'http://localhost:8000', "http://127.0.0.1:8000"]
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = (
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-    'csrftoken'
-)
 
 
 # Database

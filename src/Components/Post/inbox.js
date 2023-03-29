@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useLayoutEffect } from "react";
 // Component Imports
 import POST from "./Post";
 import CREATEPOST from "./CreatePost";
@@ -15,29 +15,24 @@ function INBOX() {
 	const [inbox, setInbox] = useState({ items: [] });
 	const [curPage, setCurPage] = useState("inbox");
 	const [open, setOpen] = useState(false);
-	const [state, setState] = useState({ count: 0 });
 	let navigate = useNavigate();
 
 	// Get the inbox
 	useEffect(() => {
 		if (!localStorage.getItem("loggedIn")) {
-			navigate("/signin");
+			navigate("/login");
 		} else {
 			const author_id = getAuthorId(null);
-			const url = `authors/${author_id}/inbox`;
+			const url = `authors/${author_id}/inbox/`;
 			reqInstance({ method: "get", url: url }).then((res) => {
-				setInbox(res.data);
+				setInbox(res.data.results);
 			});
 		}
 	}, []);
 
-	const refreshInbox = useCallback(() => {
-		setState(({ count }) => ({ count: count + 1 }));
-	});
-
 	const item = (obj) => {
 		if (obj.type === "post") {
-			return <POST key={obj.id} postobj={obj} explore={true} />;
+			return <POST key={obj.id} postobj={obj} />;
 		}
 		if (obj.type === "Like") {
 			return <LIKEINBOX key={obj.id} likeobj={obj} />;
@@ -66,9 +61,9 @@ function INBOX() {
 
 	async function handleLogoutClick() {
 		reqInstance.post("dlogout/").then((res) => {
-			if (res.status === 202) {
+			if (res.status === 200) {
 				unsetCurrentUser();
-				navigate("/signin");
+				navigate("/login");
 			}
 		});
 	}
@@ -119,9 +114,9 @@ function INBOX() {
 				</Nav>
 			</Navbar>
 			<Panel bordered header="New Post" collapsible>
-				<CREATEPOST refresh={refreshInbox}></CREATEPOST>
+				<CREATEPOST></CREATEPOST>
 			</Panel>
-			{inbox.items && inbox.items.map((obj) => item(obj))}
+			{inbox.items.map((obj) => item(obj))}
 			<ADD_FRIEND_MODAL open={open} handleClose={handleModalClose} />
 		</div>
 	);
