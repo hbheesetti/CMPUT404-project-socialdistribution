@@ -1,32 +1,21 @@
-from django.http import HttpResponseRedirect
 from author.basic_auth import BasicAuthenticator
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse,reverse_lazy
-from django.views import generic
+from django.shortcuts import get_object_or_404
 from .models import Post
-from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import *
-from django.http import HttpResponse
+from .pagination import CustomCommentPagination
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
 from .serializers import *
-from .pagination import PostSetPagination
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
+from social.pagination import CustomPagination
 from rest_framework import status
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.renderers import (
-                                        HTMLFormRenderer, 
-                                        JSONRenderer, 
-                                        BrowsableAPIRenderer,
-                                    )
 import base64
-import json
 from client import *
 from .image_renderer import JPEGRenderer, PNGRenderer
 
@@ -485,20 +474,22 @@ Publicpostget = {
 
     )}
 
-
- 
-
-
 class post_list(APIView, PageNumberPagination):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
-
-    # for pagination
     serializer_class = PostSerializer
-    pagination_class = PostSetPagination
-    
+    pagination_class = CustomPagination
 
-    # TODO: RESPONSE AND REQUESTS
+    # ref: https://auganrymkhan.com/tutorial/implementing-a-custom-configured-pagination-in-django-rest-framework-using-listapiview-and-apiview
+    @property
+    def paginator(self):
+        """The paginator instance associated with the view, or `None`."""
+        if not hasattr(self, '_paginator'):
+            if self.pagination_class is None:
+                self._paginator = None
+            else:
+                self._paginator = self.pagination_class()
+        return self._paginator
     
     @swagger_auto_schema(responses =PostsGet, operation_summary="List all Posts for an Author")
     def get(self, request, pk_a):
@@ -511,10 +502,10 @@ class post_list(APIView, PageNumberPagination):
         # privacy is all handled when post is created, except for image posts
 
         posts = Post.objects.filter(author=author)
-        posts = self.paginate_queryset(posts, request)
+        posts = self.paginator.paginate_queryset(posts, self.request, view=self)
 
         serializer = PostSerializer(posts, many=True)
-        return self.get_paginated_response(serializer.data)
+        return self.paginator.get_paginated_response(serializer.data, "posts")
 
     @swagger_auto_schema(responses = PostsPOST, operation_summary="Create a new Post for an Author",request_body=openapi.Schema( type=openapi.TYPE_STRING,description='A raw text input for the POST request',example = {
      "type":"post",
@@ -550,7 +541,7 @@ class post_list(APIView, PageNumberPagination):
             post = serializer.save()
             # pass in the shared authors on post creation and share to other users' inboxes
             share_object(post,author,request.data['authors'])
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         # 400 on incorrect serializer data
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -574,8 +565,6 @@ class CommentDetailView(APIView):
             return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
         
 class post_detail(APIView, PageNumberPagination):
-    serializer_class = PostSerializer
-    pagination_class = PostSetPagination
 
     @swagger_auto_schema(responses = IndividualPOSTGet, operation_summary="Get a particular post of an author")
     def get(self, request, pk_a, pk):
@@ -772,47 +761,23 @@ class CommentLikesView(APIView):
         serializer = LikeSerializer(likes, many=True)
         return Response(serializer.data)
 
-@swagger_auto_schema( method='get', operation_summary="Get the comments on a post")
-@api_view(['GET'])
-@authentication_classes([BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def get_comments(request, pk_a, pk):
-    """
-    Get the list of comments on the post
-    """
-    # try-excepts to catch not founds
-    try:
-        author = Author.objects.get(id=pk_a)
-    except Author.DoesNotExist:
-        error_msg = "Author not found"
-        return Response(error_msg,status=status.HTTP_404_NOT_FOUND)
-    try:
-        post = Post.objects.get(author=author, id=pk)
-    except Post.DoesNotExist:
-        error_msg = "Post not found"
-        return Response(error_msg,status=status.HTTP_404_NOT_FOUND)
-    
-    # filter for the comments on that post by that author
-    comments = Comment.objects.filter(author=author,post=post)
-    serializer = CommentSerializer(comments, many=True)
-    return Response(serializer.data)
-
 class PostLikesView(APIView):
     @swagger_auto_schema(operation_summary="Get the likes on a post")
     @authentication_classes([BasicAuthentication])
     @permission_classes([IsAuthenticated])
-    def get(request, pk_a):
+    def get(self, request, pk_a, pk):
         """
         Get the list of likes on a post
         """
         # safety try-except
         try:
-            post = Post.objects.get(id=request[""])
+            post = Post.objects.get(id=pk)
         except Post.DoesNotExist:
             error_msg = "Post not found"
             return Response(error_msg,status=status.HTTP_404_NOT_FOUND)
         # filter for all the likes on that post
-        likes = Like.objects.filter(object=post.url)
+        url = post.url[:-1] if post.url.endswith('/') else post.url
+        likes = Like.objects.filter(object=url)
         serializer = LikeSerializer(likes, many=True)
         return Response(serializer.data)
 
@@ -869,11 +834,20 @@ class CommentView(APIView, PageNumberPagination):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = CommentSerializer
-    pagination_class = PostSetPagination
-    page_size_query_param = 'page_size'
+    pagination_class = CustomCommentPagination
 
+    # ref: https://auganrymkhan.com/tutorial/implementing-a-custom-configured-pagination-in-django-rest-framework-using-listapiview-and-apiview
+    @property
+    def paginator(self):
+        """The paginator instance associated with the view, or `None`."""
+        if not hasattr(self, '_paginator'):
+            if self.pagination_class is None:
+                self._paginator = None
+            else:
+                self._paginator = self.pagination_class()
+        return self._paginator
     
-    @swagger_auto_schema(responses =GetComments, operation_summary="List all Comments on a post")
+    @swagger_auto_schema(responses = GetComments, operation_summary="List all Comments on a post")
     def get(self, request, pk_a, pk):
         try:
             author = Author.objects.get(id=pk_a)
@@ -882,6 +856,7 @@ class CommentView(APIView, PageNumberPagination):
             return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
         
         post = Post.objects.get(id=pk)
+        post_data = PostSerializer(post).data
         # changed to filter for all comments on the post, it was filtering
         # the comments by the author of the post on the post otherwise.
         # comments = Comment.objects.filter(author=author,post=post)
@@ -897,16 +872,13 @@ class CommentView(APIView, PageNumberPagination):
             if post.author != authenticated_user:
                 comments = comments.exclude(author=post.author.friends)
         
-        paginator = self.pagination_class()
-        comments_page = paginator.paginate_queryset(comments, request, view=self)
+        comments_page = self.paginator.paginate_queryset(comments, self.request, view=self)
         serializer = CommentSerializer(comments_page, many=True)
-        commentsObj = {}
-        commentsObj['comments'] = serializer.data
-        response = paginator.get_paginated_response(serializer.data)
+        response = self.paginator.get_paginated_response(serializer.data, post_data['id'], post_data['comments'])
         return response
 
 
-    @swagger_auto_schema(responses =CreateComment, operation_summary="Create a comment on the post", request_body=openapi.Schema( type=openapi.TYPE_STRING,description='A raw text input for the PUT request', example = {"author_id" : "cfd9d228-44df-4a95-836f-c0cb050c7ad6", "comment": "hi"}))
+    @swagger_auto_schema(responses = CreateComment, operation_summary="Create a comment on the post", request_body=openapi.Schema( type=openapi.TYPE_STRING,description='A raw text input for the PUT request', example = {"author_id" : "cfd9d228-44df-4a95-836f-c0cb050c7ad6", "comment": "hi"}))
     def post(self, request,pk_a, pk):
         comment_id = uuid.uuid4()
         # try to get the author, return 404 if ID doesn't exist
@@ -995,27 +967,27 @@ class PublicPostsView(APIView):
         posts = Post.objects.filter(visibility='PUBLIC')
         serializer = PostSerializer(posts, many=True)
         data_list = serializer.data
-
-        yoshi = getNodeAuthors_Yoshi()
+        if (request.GET.get("local") == "true") :
+            yoshi = getNodeAuthors_Yoshi()
+            for yoshi_author in yoshi:
+                id = yoshi_author["id"].split('/')[-1] or yoshi_author["id"]
+                posts = getNodePost_Yoshi(id)
+                posts = posts[0]['items']
+                for post in posts:
+                    if post["visibility"]=='PUBLIC':
+                        data_list.append(post)
+            social_distro = getNodeAuthors_social_distro()
+            for social_distro_author in social_distro:
+                id = social_distro_author["id"].split('/')[-1] or social_distro_author["id"]
+                posts = getNodePost_social_distro(id)
+                
+                posts = posts['results']
+                print(posts)
+                for post in posts:
+                    if post["visibility"]=='PUBLIC':
+                        data_list.append(post)
+        return Response(data_list)  
         
-        for yoshi_author in yoshi:
-            id = yoshi_author["id"].split('/')[-1] or yoshi_author["id"]
-            posts = getNodePost_Yoshi(id)
-            posts = posts[0]['items']
-            for post in posts:
-                if post["visibility"]=='Public':
-                    data_list.append(post)
-        social_distro = getNodeAuthors_social_distro()
-        for social_distro_author in social_distro:
-            id = social_distro_author["id"].split('/')[-1] or social_distro_author["id"]
-            posts = getNodePost_social_distro(id)
-            
-            posts = posts['results']
-          
-            for post in posts:
-                if post["visibility"]=='PUBLIC':
-                    data_list.append(post)
-        return Response(data_list)
         
 # share a post to an inbox
 def share_object(item, author, shared_user):
@@ -1024,12 +996,6 @@ def share_object(item, author, shared_user):
     # TODO: refactor once auth is set up
     authenticated_user = "joe"
     print(item.visibility)
-
-    # public post (send to all inboxes)
-    if (item.visibility == 'PUBLIC'):
-        for foreign_author in Author.objects.all().exclude(id=author.id):
-            inbox_item = Inbox(content_object=item, author=foreign_author)
-            inbox_item.save()
 
     # friend post (send to friend inbox)
     if (item.visibility == 'FRIENDS'):

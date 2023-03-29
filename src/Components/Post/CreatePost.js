@@ -15,7 +15,7 @@ import { getAuthorId } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 import PROFILEIMAGE from "../Profile/ProfileImage";
 
-function CREATEPOST() {
+function CREATEPOST({ refresh }) {
 	const [post_status, set_post_status] = useState("PUBLIC");
 	const [post_type, set_post_type] = useState("text/plain");
 	const [text, setText] = useState("");
@@ -41,10 +41,10 @@ function CREATEPOST() {
 
 	useLayoutEffect(() => {
 		if (!localStorage.getItem("loggedIn")) {
-			navigate("/login");
+			navigate("/signin");
 		} else {
 			const AUTHOR_ID = getAuthorId(null);
-			const url = `authors/${AUTHOR_ID}/followers/`;
+			const url = `authors/${AUTHOR_ID}/followers`;
 			reqInstance({
 				method: "get",
 				url: url,
@@ -193,7 +193,6 @@ function CREATEPOST() {
 		reqInstance({ method: "post", url: url, data: params })
 			.then((res) => {
 				if (res.status === 200) {
-					notifySuccessPost();
 					setText("");
 					setDescription("");
 					setTitle("");
@@ -202,6 +201,8 @@ function CREATEPOST() {
 					set_post_type("text/plain");
 					setMarkdown("");
 					setAuthors([]);
+					window.location.reload();
+					notifySuccessPost();
 				} else {
 					notifyFailedPost(res.data);
 				}
@@ -255,7 +256,6 @@ function CREATEPOST() {
 					disabled={disabled}
 					valeu={authors}
 					onChange={(e) => {
-						console.log(e);
 						setAuthors(e);
 					}}
 				/>

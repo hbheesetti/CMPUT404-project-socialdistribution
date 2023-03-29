@@ -21,6 +21,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from django.views.decorators.csrf import csrf_exempt
 
 custom_parameter = openapi.Parameter(
     name='custom_param',
@@ -50,7 +51,7 @@ class register(APIView):
             user.is_active = False
             user.save()
             url = "authors/" + id_
-            author = Author(user=user, id = id_, displayName= display_name, url=url)
+            author = Author(user=user, id = id_, displayName= display_name, url=url, host="https://sociallydistributed.herokuapp.com/")
             author.save()
             return(HttpResponse(id_, status=status.HTTP_201_CREATED))
         except IntegrityError as e: 
@@ -60,7 +61,7 @@ class register(APIView):
 
 @authentication_classes([])
 @permission_classes([])
-class login(APIView):
+class dlogin(APIView):
     def post(self, request):
         """deals with user auth"""
         username = request.data['username']
@@ -68,6 +69,8 @@ class login(APIView):
         auth = AllowAllUsersModelBackend()
     
         user = auth.authenticate(request=request, username=username, password= password)
+        if user:
+            login(request, user)
         if not user:
             return Response("user not registered", status=status.HTTP_401_UNAUTHORIZED)
 
@@ -76,7 +79,7 @@ class login(APIView):
             params = AuthorSerializer(author)
             return Response(params.data, status=status.HTTP_202_ACCEPTED)
         else:
-            return Response("user needs to wait for approval from a server admin", status=status.HTTP_402_PAYMENT_REQUIRED)
+            return Response("user needs to wait for approval from a server admin", status=status.HTTP_401_UNAUTHORIZED)
 
 def csrf(request):
     return JsonResponse({'csrfToken': get_token(request)})
@@ -84,6 +87,7 @@ def csrf(request):
 # class logout(APIView):
 @authentication_classes([])
 @permission_classes([])
-def logout_view(request):
-    logout(request)
-    return Response( status=status.HTTP_202_ACCEPTED)
+class logoutView(APIView):
+    def post(self,request):
+        logout(request)
+        return Response( status=status.HTTP_202_ACCEPTED)

@@ -39,10 +39,10 @@ function PROFILE() {
 
 	useEffect(() => {
 		if (!localStorage.getItem("loggedIn")) {
-			navigate("/login");
+			navigate("/signin");
 		} else {
 			setImage(getProfileImageUrl);
-			setAuthor(localStorage.getItem("user"));
+			setAuthor(JSON.parse(localStorage.getItem("user")));
 		}
 	}, []);
 
@@ -63,9 +63,9 @@ function PROFILE() {
 	};
 
 	async function handleLogoutClick() {
-		reqInstance.post("accounts/logout/").then((res) => {
-			if (res.status === 200) {
-				navigate("/login");
+		reqInstance.post("dlogout/").then((res) => {
+			if (res.status === 202) {
+				navigate("/signin");
 			}
 		});
 	}
@@ -120,6 +120,15 @@ function PROFILE() {
 			.catch((err) => notifyFailedPost(err.data));
 	}
 
+	const header = (
+		<div>
+			<PROFILEIMAGE size="lg" />
+			<h2 style={{ marginLeft: "10px", float: "left" }}>
+				{author.displayName}
+			</h2>
+		</div>
+	);
+
 	return (
 		<div style={{ padding: "10px", width: "60%", margin: "auto" }}>
 			<Navbar>
@@ -137,12 +146,7 @@ function PROFILE() {
 					<Nav.Item onClick={handleOpen}>Add Friend</Nav.Item>
 				</Nav>
 			</Navbar>
-			<Panel shaded>
-				<PROFILEIMAGE size="lg" />
-				<h2 style={{ marginLeft: "10px", float: "left" }}>
-					{author["displayName"]}
-				</h2>
-
+			<Panel shaded header={header}>
 				<InputGroup inside style={{ marginTop: "5px" }}>
 					<Input
 						placeholder="Profile Image Url"
