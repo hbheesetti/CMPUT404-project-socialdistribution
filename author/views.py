@@ -1,24 +1,13 @@
 import json
 from django.db import IntegrityError
 from django.forms import model_to_dict
-from django.shortcuts import render
-from .basic_auth import BasicAuthenticator
-# Create your views here.
-
-from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
-from django.urls import reverse,reverse_lazy
-from django.views import generic
-from django.views.generic import ListView,DetailView,CreateView,UpdateView,DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from .pagination import *
+from django.shortcuts import get_object_or_404
+from author.pagination import *
 from posts.serializers import *
 from .models import *
 from .serializers import *
-from django.http import HttpResponse
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
@@ -29,6 +18,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from client import *
+from django.core.paginator import Paginator
+from social.pagination import CustomPagination
 
 custom_parameter = openapi.Parameter(
     name='custom_param',
@@ -193,10 +184,6 @@ InboxGet = {
 class AuthorsListView(APIView, PageNumberPagination):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
-    # for pagination
-    page_size = 10
-    page_size_query_param = 'size'
-    max_page_size = 100
     @swagger_auto_schema(responses= GetAuthorsExample,operation_summary="List of Authors registered")
     def get(self, request):
         
@@ -212,20 +199,18 @@ class AuthorsListView(APIView, PageNumberPagination):
         
         # create a list of our own authors
         authors = Author.objects.all()
-        authors=self.paginate_queryset(authors, request)
         serializer = AuthorSerializer(authors, many=True)
         data_list = serializer.data
-        
         # get remote authors and add to list
-        yoshi = getNodeAuthors_Yoshi()
-        for yoshi_author in yoshi:
-            data_list.append(yoshi_author)
+        # yoshi = getNodeAuthors_Yoshi()
+        # for yoshi_author in yoshi:
+        #     data_list.append(yoshi_author)
         social_distro = getNodeAuthors_social_distro()
         for social_distro_author in social_distro:
             data_list.append(social_distro_author)
-        
+
         # paginate + send
-        return self.get_paginated_response(data_list)
+        return Response(ViewPaginatorMixin.paginate(self,object_list=data_list, page=int(self.request.GET.get('page', 1)), size=int(self.request.GET.get('size', 50))))
 
 class AuthorView(APIView):
     authentication_classes = [BasicAuthentication]
@@ -257,12 +242,12 @@ class AuthorView(APIView):
                 # get yoshi's author at node
                 author_json, status_code = getNodeAuthor_Yoshi(pk_a)
                 if status_code == 200:
-                    # author_dict = json.loads(author_json)
-                    # author = Author(id = author_json['authorId'], displayName= author_json['displayname'], url=author_json['url'], profileImage=author_json['profileImage'], github=author_json['github'], host=author_json['host'])
+                    author_dict = json.loads(author_json)
+                    author = Author(id = author_json['authorId'], displayName= author_json['displayname'], url=author_json['url'], profileImage=author_json['profileImage'], github=author_json['github'], host=author_json['host'])
                     return Response(author_json)
                 # get social distro's authors and format their data to our style
                 else:
-                    author_json, status_code = getNodeAuthor_app2(pk_a)
+                    author_json, status_code = getNodeAuthor_social_distro(pk_a)
                     if status_code == 200:
                         # formatting (theirs is nonetype while ours is empty string)
                         if author_json['profileImage'] == None:
@@ -521,8 +506,6 @@ class Inbox_list(APIView, InboxSerializerObjects, PageNumberPagination):
     """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = InboxSerializer
-    pagination_class = InboxSetPagination
 
     @swagger_auto_schema(responses = InboxGet, operation_summary="Get all the objects in the inbox")
     def get(self, request, pk_a):
@@ -530,12 +513,11 @@ class Inbox_list(APIView, InboxSerializerObjects, PageNumberPagination):
 
         author = get_object_or_404(Author,pk=pk_a)
         inbox_data = author.inbox.all()
-        inbox_data = self.paginate_queryset(inbox_data,request)
         serializer = InboxSerializer(data=inbox_data, context = {"serializer":self.serialize_inbox_objects}, many=True)
         serializer.is_valid()
         data = self.get_items(pk_a, serializer.data)
         # TODO: Fix pagination
-        return self.get_paginated_response(data)
+        return Response(data, status=status.HTTP_200_OK)
     
     
     @swagger_auto_schema(responses = InboxPOST, operation_summary="Post a new object to the inbox",request_body=openapi.Schema( type=openapi.TYPE_STRING,description='A raw text input for the POST request', example = {

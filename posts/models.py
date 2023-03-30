@@ -107,7 +107,7 @@ class Post(models.Model):
         return 'post'
     
     class Meta:
-        ordering = ['published']
+        ordering = ['-published']
         
 class Comment(models.Model):
     id = models.CharField(primary_key=True, editable=False, default= uuid.uuid4, max_length=255)  # ID of comment
