@@ -31,15 +31,11 @@ function COMMENTS({ postobj }) {
 			url: url,
 		})
 			.then((res) => {
-<<<<<<< HEAD
-				setCommentObj(res.data.comments);
-=======
 				if (res.data.comments) {
 					setCommentObj(res.data.comments);
 				} else if (res.data.results) {
 					setCommentObj(res.data.results);
 				}
->>>>>>> origin/dev
 			})
 			.catch((err) => console.log(err));
 	}
