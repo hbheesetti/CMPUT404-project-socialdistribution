@@ -26,7 +26,7 @@ function INBOX() {
 			const author_id = getAuthorId(null);
 			const url = `authors/${author_id}/inbox`;
 			reqInstance({ method: "get", url: url }).then((res) => {
-				setInbox(res.data);
+				setInbox(res.data.results);
 			});
 		}
 	}, []);
@@ -121,7 +121,7 @@ function INBOX() {
 			<Panel bordered header="New Post" collapsible>
 				<CREATEPOST refresh={refreshInbox}></CREATEPOST>
 			</Panel>
-			{inbox.items && inbox.items.map((obj) => item(obj))}
+			{inbox.items.map((obj) => item(obj))}
 			<ADD_FRIEND_MODAL open={open} handleClose={handleModalClose} />
 		</div>
 	);

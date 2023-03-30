@@ -21,7 +21,7 @@ function AUTHORPOSTS() {
 			const url = `posts/authors/${author_id}/posts/`;
 			reqInstance({ method: "get", url: url })
 				.then((res) => {
-					setPosts(res.data.items);
+					setPosts(res.data.results);
 				})
 				.catch((err) => console.log(err));
 		}
