@@ -204,9 +204,7 @@ class AuthorsListView(APIView, PageNumberPagination):
         Get the list of authors on our website
         """
         content = {
-
             'user':str(request.user),
-
             'auth': str(request.auth)
         }
         
@@ -215,15 +213,6 @@ class AuthorsListView(APIView, PageNumberPagination):
         authors=self.paginate_queryset(authors, request)
         serializer = AuthorSerializer(authors, many=True)
         data_list = serializer.data
-        
-        # get remote authors and add to list
-        yoshi = getNodeAuthors_Yoshi()
-        for yoshi_author in yoshi:
-            data_list.append(yoshi_author)
-        social_distro = getNodeAuthors_social_distro()
-        for social_distro_author in social_distro:
-            data_list.append(social_distro_author)
-        
         # paginate + send
         return self.get_paginated_response(data_list)
 
@@ -237,7 +226,7 @@ class AuthorView(APIView):
             if 'displayName' not in data:
                 # if the displayname is not part of the data, add it from the author data
                 data['displayName'] = Author.objects.get(displayName=data['displayName']).weight
-            return data 
+            return data
         except Author.DoesNotExist:
             error_msg = "Author id not found"
             return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
@@ -248,37 +237,11 @@ class AuthorView(APIView):
         """
         Get a particular author searched by AuthorID
         """
-        # first, try to get local author
         try:
             author = Author.objects.get(pk=pk_a)
-        # if local author isn't there, see if it's from remote
         except Author.DoesNotExist:
-            try: 
-                # get yoshi's author at node
-                author_json, status_code = getNodeAuthor_Yoshi(pk_a)
-                if status_code == 200:
-                    # author_dict = json.loads(author_json)
-                    # author = Author(id = author_json['authorId'], displayName= author_json['displayname'], url=author_json['url'], profileImage=author_json['profileImage'], github=author_json['github'], host=author_json['host'])
-                    return Response(author_json)
-                # get social distro's authors and format their data to our style
-                else:
-                    author_json, status_code = getNodeAuthor_social_distro(pk_a)
-                    if status_code == 200:
-                        # formatting (theirs is nonetype while ours is empty string)
-                        if author_json['profileImage'] == None:
-                            profileImage = ''
-                        if author_json['github'] == None:
-                            github = ''
-                        author = Author(id = pk_a, displayName= author_json['displayName'], url=author_json['url'], profileImage=profileImage, github=github, host=author_json['host'])
-                    else:
-                        error_msg = "Author id not found"
-                        return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
-            except Exception as e:
-                print(e)
-                # author is not found, so 404
-                error_msg = "Author id not found"
-                return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
-        # return the data
+            error_msg = "Author id not found"
+            return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
         serializer = AuthorSerializer(author,partial=True)
         return  Response(serializer.data)
     
@@ -327,18 +290,18 @@ class FollowersView(APIView):
         # If url is /authors/authors/author_id/followers/
         # add local followers to the list of followers
         if pk ==None:
-            followers = author.friends.all()
-            followers_list = []
-            for follower in followers:
-                try: 
-                    follower_author = Author.objects.get(id=follower.id)
-                except Author.DoesNotExist:
-                    error_msg = "Follower id not found"
-                    return Response(error_msg, status=status.HTTP_404_NOT_FOUND) 
-                followers_list.append(AuthorSerializer(follower_author).data)
+            followers = author.friends
+            # followers_list = []
+            # for follower in followers:
+            #     try: 
+            #         follower_author = Author.objects.get(id=follower.id)
+            #     except Author.DoesNotExist:
+            #         error_msg = "Follower id not found"
+            #         return Response(error_msg, status=status.HTTP_404_NOT_FOUND) 
+            #     followers_list.append(AuthorSerializer(follower_author).data)
 
             items = {"type": "followers",
-                    "items": followers_list
+                    "items": followers
             }
 
             return Response(items, status=200)
@@ -347,16 +310,14 @@ class FollowersView(APIView):
         else:
             try:
                 follower = Author.objects.get(id=pk)
-            # follower = Author.objects.get(id=request.data["foreign_author_id"])
             except Author.DoesNotExist:
                 error_msg = "Foreign Author id not found"
                 return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
 
-            friends = author.friends.all()
+            friends = author.friends
             if follower in friends:
-                serializer = AuthorSerializer(follower,partial=True)
                 #returns the follower
-                return  Response(serializer.data)
+                return  Response(follower)
             else:
                 #if the follower is not apart of the followers list return empty{}
                 return Response({})
@@ -364,32 +325,22 @@ class FollowersView(APIView):
 
     #For this we need nothing in the content field only the url with the author id of the person that is being followed by foreign author id 
     #call using ://authors/authors/{AUTHOR_ID}/followers/foreign_author_id/
-    #Implement later after talking to group 
     @swagger_auto_schema(responses = OneAuthorUpdated, operation_summary="Add to followers",request_body=openapi.Schema( type=openapi.TYPE_STRING,description='A raw text input for the PUT request'))
     def put(self, request, pk_a, pk):
         try:
             author = Author.objects.get(id=pk_a)
-            # author = Author.objects.get(id=request.data["author_id"])
         except Author.DoesNotExist:
             error_msg = "Author id not found"
             return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
 
         try:
             new_follower = Author.objects.get(id=pk)
-            # new_follower = Author.objects.get(id=request.data["foreign_author_id"])
         except Author.DoesNotExist:
             error_msg = "Follower id not found"
             return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
 
         followers = author.friends
-        followers.add(new_follower)
         author.save()
-        try: 
-            follow = FollowRequest.objects.get(actor=new_follower,object=author)
-            Inbox.objects.get(object_id=follow.id).delete()
-        except:
-            pass
-
         # return the new list of followers
         return Response(new_follower.follower_to_object())
 
@@ -420,56 +371,6 @@ class FollowersView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 #request_body=openapi.Schema( type=openapi.TYPE_STRING,description='A raw text input for the POST request'))
-class FriendRequestView(APIView):
-    authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]
-    serializer_class = FollowRequestSerializer
-    
-    def post(self,request,pk_a):
-        try:
-            actor = Author.objects.get(id=pk_a)
-            displaynameto = request.data['displayName']
-            displaynamefrom=actor.displayName
-            objects = Author.objects.filter(displayName = displaynameto)[0]
-
-            if FollowRequest.objects.filter(actor=actor, object=objects).exists():
-                return Response("You've already sent a request to this user", status=status.HTTP_400_BAD_REQUEST)
-            if actor==objects:
-                return Response("You cannot follow yourself!", status=status.HTTP_400_BAD_REQUEST)
-            
-            type = "Follow"
-            summary = displaynamefrom + " wants to follow " + displaynameto
-            follow = FollowRequest(Type = type,Summary=summary,actor=actor, object=objects)
-            follow.save()
-            serializer = FollowRequestSerializer(follow)
-            return Response(serializer.data)
-        
-        except Author.DoesNotExist:
-            error_msg = "Author id not found"
-            return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
-    
-class ViewRequests(APIView):
-    authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]
-    serializer_class = FollowRequestSerializer
-    # @permission_classes([IsAuthenticated])
-    def get(self,request,pk_a):
-        """
-        Get the list of Follow requests for the current Author
-        """
-        try:    
-            Object = Author.objects.get(id=pk_a)
-            displaynamefrom=Object.displayName
-
-            requests = FollowRequest.objects.filter(object = Object)
-            serializer = FollowRequestSerializer(requests,many=True)
-            return Response(serializer.data)
-        
-        except Author.DoesNotExist:
-            error_msg = "Author id not found"
-            return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
 
 class InboxSerializerObjects:
     authentication_classes = [BasicAuthentication]
@@ -511,7 +412,7 @@ class InboxSerializerObjects:
             context={'author_id': pk_a,'id':data["id"].split("/")[-1]}
         elif type == FollowRequest.get_api_type():
             serializer = FollowRequestSerializer
-            context={'actorr': data["actor"]["id"],'objectt':data["object"]["id"]}
+            context={'actor': data['actor'],'object':data['object']}
             
         return obj or serializer(data=data, context=context, partial=True)
 
@@ -534,7 +435,6 @@ class Inbox_list(APIView, InboxSerializerObjects, PageNumberPagination):
         serializer = InboxSerializer(data=inbox_data, context = {"serializer":self.serialize_inbox_objects}, many=True)
         serializer.is_valid()
         data = self.get_items(pk_a, serializer.data)
-        # TODO: Fix pagination
         return self.get_paginated_response(data)
     
     

@@ -8,15 +8,12 @@ from django.urls import reverse
 from django.conf import settings
 
 
-defaultfrd = {
-    "type": "followers",      
-    "items":[]
-}
+defaultfrd = []
 # Create your models here.
 class Author(models.Model):
     id = models.CharField(primary_key=True, editable=False, default= uuid.uuid4, max_length=255)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)  #1-1 with django user
-    friends = models.CharField(blank=False, default=defaultfrd)
+    friends = models.CharField(blank=False, default=defaultfrd, max_length=1000)
     displayName = models.CharField(max_length=50, blank=False)  # displayed name of author
     profileImage = models.URLField(editable=True,blank=True, max_length=500) # profile image of author, optional
     url = models.URLField(editable=False, max_length=500)  # url of author profile
@@ -82,9 +79,8 @@ class Inbox(models.Model):
         ordering = ['-published']
 
 class FollowRequest(models.Model):
-    #type =models.CharField(max_length=255, blank=True)
-    actor = models.ForeignKey(Author, related_name='actor', on_delete=models.CASCADE)
-    object = models.ForeignKey(Author, related_name='object', on_delete=models.CASCADE)
+    actor = models.CharField(blank=False,  max_length=1000, editable=False)
+    object = models.CharField(blank=False, max_length=1000, editable=False)
     summary = models.CharField(max_length=255, default = '')
     accepted = models.BooleanField(default=False)
 

@@ -45,7 +45,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 class FollowRequestSerializer(serializers.ModelSerializer):
     #to_user = serializers.CharField(default = 'x')
     type = serializers.CharField(default="Follow",source="get_api_type",read_only=True)
-    summary = serializers.CharField(source="get_summary", read_only=True)
+    summary = serializers.CharField(read_only=True)
 
     actor = AuthorSerializer(required=True)
     object = AuthorSerializer(required=True)
@@ -53,16 +53,16 @@ class FollowRequestSerializer(serializers.ModelSerializer):
     #actor = serializers.PrimaryKeyRelatedField(queryset=Author.objects.all())
    # object = serializers.PrimaryKeyRelatedField(queryset=Author.objects.all())
     def create(self,validated_data):
-        actor = AuthorSerializer.extract_and_upcreate_author(validated_data, author_id=self.context["actorr"])
-        object = AuthorSerializer.extract_and_upcreate_author(validated_data, author_id=self.context["objectt"])
+        actor = self.context['actor']
+        object = self.context['object']
+        summary = json.parse(actor).displayName + " wants to follow " + json.parse(object)['displayName']
 
         if FollowRequest.objects.filter(actor=actor, object=object).exists():
             return "already sent"
         elif actor==object:
             return "same"
         else:
-
-             return FollowRequest.objects.create(actor=actor,object=object)
+            return FollowRequest.objects.create(actor=actor,object=object)
 
     class Meta:
         model = FollowRequest
