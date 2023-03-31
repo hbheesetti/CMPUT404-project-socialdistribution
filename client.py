@@ -6,16 +6,18 @@ import json
 def clean_dict(dirty):
     result = {}
     for key,value in dirty.items():
-        # if the type for some key is not str, make it an empty
-        # str so that the format matches ours
+        # categories is a single str in our format
         if key == "categories":
             category = ''
             for item in value:
-                category += item
+                category += item + ","
             value = category
+        # unlisted field is in our visibility field
         elif key == "unlisted":
             if value == True:
                 result["visibility"] = "UNLISTED"
+        # if the type for some key is not str, make it an empty
+        # str so that the format matches ours
         elif type(value) != str:
             value = ''
         result[key] = value
