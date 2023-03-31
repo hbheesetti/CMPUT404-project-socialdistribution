@@ -20,6 +20,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from client import *
 from django.core.paginator import Paginator
 from social.pagination import CustomPagination
+from posts.github.utils import get_github_activities
 
 custom_parameter = openapi.Parameter(
     name='custom_param',
@@ -205,9 +206,9 @@ class AuthorsListView(APIView, PageNumberPagination):
         # yoshi = getNodeAuthors_Yoshi()
         # for yoshi_author in yoshi:
         #     data_list.append(yoshi_author)
-        social_distro = getNodeAuthors_social_distro()
-        for social_distro_author in social_distro:
-            data_list.append(social_distro_author)
+        #social_distro = getNodeAuthors_social_distro()
+        #for social_distro_author in social_distro:
+        #    data_list.append(social_distro_author)
 
         # paginate + send
         return Response(ViewPaginatorMixin.paginate(self,object_list=data_list, page=int(self.request.GET.get('page', 1)), size=int(self.request.GET.get('size', 50))))
@@ -403,6 +404,19 @@ class FollowersView(APIView):
         
         # return the new list of followers
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class GitHubView(APIView):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk_a):
+        author = get_object_or_404(Author,pk=pk_a)
+
+        github_posts = get_github_activities(author.github, author)
+
+        serializer = PostSerializer(github_posts,many=True)
+        
+        return Response(serializer.data)        
 
 #request_body=openapi.Schema( type=openapi.TYPE_STRING,description='A raw text input for the POST request'))
 class FriendRequestView(APIView):
@@ -516,7 +530,6 @@ class Inbox_list(APIView, InboxSerializerObjects, PageNumberPagination):
         serializer = InboxSerializer(data=inbox_data, context = {"serializer":self.serialize_inbox_objects}, many=True)
         serializer.is_valid()
         data = self.get_items(pk_a, serializer.data)
-        # TODO: Fix pagination
         return Response(data, status=status.HTTP_200_OK)
     
     
@@ -585,8 +598,7 @@ class Inbox_list(APIView, InboxSerializerObjects, PageNumberPagination):
         dict = {"type":"inbox", "author": settings.APP_NAME + '/authors/' + pk_a }
         items = []
         for item in data:
-            items.append(item["content_object"])
-
+            items.append(item["content_object"]) 
         dict["items"] = items
         return(dict) 
 

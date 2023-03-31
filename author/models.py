@@ -16,7 +16,7 @@ defaultfrd = {
 class Author(models.Model):
     id = models.CharField(primary_key=True, editable=False, default= uuid.uuid4, max_length=255)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)  #1-1 with django user
-    friends = models.CharField(blank=False, default=defaultfrd)
+    friends = models.ManyToManyField('self',blank=True, symmetrical=True)
     displayName = models.CharField(max_length=50, blank=False)  # displayed name of author
     profileImage = models.URLField(editable=True,blank=True, max_length=500) # profile image of author, optional
     url = models.URLField(editable=False, max_length=500)  # url of author profile

@@ -49,6 +49,7 @@ class Post(models.Model):
     published = models.DateTimeField(auto_now_add=True)  # date published
     count = models.PositiveIntegerField(default=0, blank=True)
     commentsSrc = models.CharField(max_length=255, default="", blank=True)
+    is_github = models.BooleanField(default=False)
     
     image = models.ImageField(null=True,blank=True, default="")  # reference to an image in the DB
 

@@ -38,7 +38,7 @@ function POST({ postobj, edit, explore }) {
 
 		// Peter you just need to return the image here
 		if (post["contentType"] === "image/jpeg") {
-			return <p>{}</p>;
+			return <p>{ }</p>;
 		}
 	};
 
@@ -163,6 +163,7 @@ function POST({ postobj, edit, explore }) {
 				header={header}
 				style={{
 					marginBottom: "5px",
+					backgroundColor: postobj.is_github ? '#fffdf9' : 'white'
 				}}
 			>
 				<div style={{ height: "auto" }}>
