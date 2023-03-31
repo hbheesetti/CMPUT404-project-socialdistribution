@@ -7,8 +7,16 @@ def clean_dict(dirty):
     result = {}
     for key,value in dirty.items():
         # if the type for some key is not str, make it an empty
-        # str so that the format matches us
-        if type(value) != str:
+        # str so that the format matches ours
+        if key == "categories":
+            category = ''
+            for item in value:
+                category += item
+            value = category
+        elif key == "unlisted":
+            if value == True:
+                result["visibility"] = "UNLISTED"
+        elif type(value) != str:
             value = ''
         result[key] = value
     return result
@@ -17,10 +25,11 @@ def clean_dict(dirty):
 def clean_list(dirty):
     result = []
     for i in dirty:
-        print(i)
+        # send it to the cleaner function
         result.append(clean_dict(i))
+    # JSON-ifying the result for now will just be handled outside the function
     return result
-
+        
 # def getNodeAuthors_social_distro():
 
 #     #https://social-distro.herokuapp.com/api/authors/15/
@@ -183,14 +192,14 @@ def getNodePost_social_distro(author_id):
     url = 'https://social-distro.herokuapp.com/api/authors/'
 
     url = url + author_id + '/posts/'
-    username = 'remote1'
-    password = 'r3mot31'
+    username = 'team15'
+    password = 'team15'
     #remote1:r3mot31
 
     session = requests.Session()
     session.auth = (username, password)
 
-    auth = session.post(hosturl)
+    auth = session.post(url)
     response = session.get(url)
     
     # credentials = f'{username}:{password}'
@@ -203,6 +212,9 @@ def getNodePost_social_distro(author_id):
     status_code = response.status_code
     if status_code == 200:
         json_response = response.json()
+        
+        json_response = json.dumps(clean_list(json_response['results']))
+
         return(json_response)
 
 # import socket
