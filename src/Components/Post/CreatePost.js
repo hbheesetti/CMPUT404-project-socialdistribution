@@ -27,7 +27,6 @@ function CREATEPOST({ refresh }) {
 	const [authors, setAuthors] = useState([]);
 	let navigate = useNavigate();
 	const toaster = useToaster();
-	const [image64, set_image64] = useState("");
 	const [data, setData] = useState([]);
 
 	function handleClick(eventkey) {
@@ -149,14 +148,12 @@ function CREATEPOST({ refresh }) {
 		});
 	};
 
-	async function readFileAsDataURL(file) {
-		return new Promise((resolve) => {
-			let fileReader = new FileReader();
-			fileReader.onloadend = (e) =>
-				resolve(set_image64(fileReader.result));
-			fileReader.readAsDataURL(file);
-		});
-	}
+	const toBase64 = file => new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.readAsDataURL(file);
+		reader.onload = () => resolve(reader.result);
+		reader.onerror = error => reject(error);
+	});
 
 	async function handlePostClick() {
 		const author = JSON.parse(localStorage.getItem("user"));
@@ -175,20 +172,19 @@ function CREATEPOST({ refresh }) {
 		if (post_status === "PRIVATE") {
 			params["authors"] = authors;
 		}
-		var imagefile = "";
+	
 		if (post_type === "image/png" || post_type === "image/jpeg") {
-			imagefile = document.getElementById("file").files[0];
+			const imagefile = document.getElementById("file").files[0];
 			if (imagefile) {
-				await readFileAsDataURL(imagefile).then(async (dataURL) => {
-					set_image64(dataURL);
-				});
+				params["image"] = await toBase64(imagefile);
 			}
-			params["image"] = image64;
 		}
 
 		if (categories.length > 0) {
 			params["categories"] = categories;
 		}
+
+		console.log(params);
 
 		reqInstance({ method: "post", url: url, data: params })
 			.then((res) => {
