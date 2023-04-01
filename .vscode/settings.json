@@ -2,5 +2,6 @@
   "python.analysis.extraPaths": [
     "./backend/social/posts",
     "./backend/social"
-  ]
+  ],
+  "python.pythonPath": "/usr/local/bin/python3"
 }

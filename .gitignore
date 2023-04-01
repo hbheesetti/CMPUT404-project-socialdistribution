@@ -39,3 +39,4 @@ serveradmin/migrations/__pycache__/
 author/__pycache__/
 backend/social/media/
 media/
+.vscode/

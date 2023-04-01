@@ -92,15 +92,36 @@ class LikeSerializer(serializers.ModelSerializer):
     summary = serializers.CharField(source="get_summary", read_only=True)
 
     def create(self, validated_data):
-        author = AuthorSerializer.extract_and_upcreate_author(validated_data, author_id=self.context["author_id"])
-       
+        # author = AuthorSerializer.extract_and_upcreate_author(validated_data, author_id=self.context["author_id"])
+        author = validated_data["author"]
         if Like.objects.filter(author=author, object=validated_data.get("object")).exists():
             return "already liked"
         else:
             id = str(uuid.uuid4())
-            like = Like.objects.create(**validated_data, author=author, id = id)
+            like = Like.objects.create(**validated_data, id = id)
             like.save()
             return like
+    
+    def to_internal_value(self, data):
+        print("to_internal_value")
+        author = AuthorSerializer.extract_and_upcreate_author(author=self.context["author"])
+        # object = Author.objects.get(id=self.context["object"])
+        object = self.context["object"]
+
+        # Perform the data validation.
+        if not author:
+            raise serializers.ValidationError({
+                'author': 'This field is required.'
+            })
+        if not object:
+            raise serializers.ValidationError({
+                'object': 'This field is required.'
+            })
+        
+        return {
+            'object': object,
+            'author': author
+        }
 
     class Meta:
         model = Like
@@ -110,6 +131,7 @@ class LikeSerializer(serializers.ModelSerializer):
             "author",
             "object",
         ]
+    
 
 class ImageSerializer(serializers.ModelSerializer):
     type = serializers.CharField(default="post",source="get_api_type",read_only=True)

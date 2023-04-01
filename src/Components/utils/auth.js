@@ -63,12 +63,14 @@ export async function getCsrfToken() {
 export function getAuthorId(a_id) {
 	let author_id = "";
 	const len = 36;
+
 	if (a_id === null) {
 		const author = JSON.parse(localStorage.getItem("user"));
-		author_id = author.id.slice(author.id.length - len, author.id.length);
+		var arr = author.id.split("/");
+		author_id = arr[arr.length - 1];
 	} else {
-		console.log(author_id);
-		author_id = a_id.slice(a_id.length - len, a_id.length);
+		var arr = a_id.split("/");
+		author_id = arr[arr.length - 1];
 	}
 	return author_id;
 }

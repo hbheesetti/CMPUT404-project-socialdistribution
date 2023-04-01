@@ -3,6 +3,8 @@ from django.urls import reverse
 from rest_framework import serializers, exceptions
 from .models import *
 from django.http import HttpResponse
+import client
+from Remote.Authors import getNodeAuthor_App2
 
 class AuthorSerializer(serializers.ModelSerializer):
     type = serializers.CharField(default="author",source="get_api_type",read_only=True)
@@ -15,10 +17,17 @@ class AuthorSerializer(serializers.ModelSerializer):
         author = Author.objects.create(**validated_data)   
         return author
     @staticmethod
-    def extract_and_upcreate_author(validated_data, author_id=None):
-        #validated_author_data = validated_data.pop('author') if validated_data.get('author') else None
-        updated_author = Author.objects.get(id=author_id)
+    def extract_and_upcreate_author(author):
+        print("in upcreate")
+        updated_author= None
+        try:
+            updated_author = Author.objects.get(id=author["id"])
+        except Author.DoesNotExist:
+            updated_author = Author(**author)
+            updated_author.save()
+            print("updated author saved")
         if not updated_author:
+            print("no author", updated_author)
             raise exceptions.ValidationError("Author does not exist")
         else:
             return updated_author
@@ -47,23 +56,47 @@ class FollowRequestSerializer(serializers.ModelSerializer):
     type = serializers.CharField(default="Follow",source="get_api_type",read_only=True)
     summary = serializers.CharField(source="get_summary", read_only=True)
 
-    actor = AuthorSerializer(required=True)
-    object = AuthorSerializer(required=True)
+    actor = AuthorSerializer(required=False)
+    object = AuthorSerializer(required=False)
 
-    #actor = serializers.PrimaryKeyRelatedField(queryset=Author.objects.all())
-   # object = serializers.PrimaryKeyRelatedField(queryset=Author.objects.all())
     def create(self,validated_data):
-        actor = AuthorSerializer.extract_and_upcreate_author(validated_data, author_id=self.context["actorr"])
-        object = AuthorSerializer.extract_and_upcreate_author(validated_data, author_id=self.context["objectt"])
-
-        if FollowRequest.objects.filter(actor=actor, object=object).exists():
+        print("in follow req create")
+        actor = validated_data["actor"]
+        object = validated_data["object"]
+        if actor in object.friends.all():
+            print("already friends")
+            return "already friends"
+        if FollowRequest.objects.filter(actor=actor,object=object).exists():
+            print("already sent")
             return "already sent"
-        elif actor==object:
+        actor = validated_data["actor"]
+        object = validated_data["object"]
+        if actor==object:
             return "same"
         else:
+            return FollowRequest.objects.create(actor=actor,object=object)
+    
+    # https://www.django-rest-framework.org/api-guide/serializers/
+    def to_internal_value(self, data):
+        print("to_internal_value")
+        actor = AuthorSerializer.extract_and_upcreate_author(author=self.context["actor_"])
+        object = Author.objects.get(id=self.context["object_id"])
 
-             return FollowRequest.objects.create(actor=actor,object=object)
-
+        # Perform the data validation.
+        if not actor:
+            raise serializers.ValidationError({
+                'actor': 'This field is required.'
+            })
+        if not object:
+            raise serializers.ValidationError({
+                'object': 'This field is required.'
+            })
+        
+        return {
+            'object': object,
+            'actor': actor
+        }
+        
     class Meta:
         model = FollowRequest
         fields = ['type','summary','actor', 'object']
