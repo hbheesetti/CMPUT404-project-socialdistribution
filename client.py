@@ -1,37 +1,6 @@
 import requests
 import base64
-import json
 
-# helper function that makes foreign formats similar to ours
-def clean_dict(dirty):
-    result = {}
-    for key,value in dirty.items():
-        # categories is a single str in our format
-        if key == "categories":
-            category = ''
-            for item in value:
-                category += item + ","
-            value = category
-        # unlisted field is in our visibility field
-        elif key == "unlisted":
-            if value == True:
-                result["visibility"] = "UNLISTED"
-        # if the type for some key is not str, make it an empty
-        # str so that the format matches ours
-        elif type(value) != str:
-            value = ''
-        result[key] = value
-    return result
-
-# helper function that works on lists of foreign formats
-def clean_list(dirty):
-    result = []
-    for i in dirty:
-        # send it to the cleaner function
-        result.append(clean_dict(i))
-    # JSON-ifying the result for now will just be handled outside the function
-    return result
-        
 # def getNodeAuthors_social_distro():
 
 #     #https://social-distro.herokuapp.com/api/authors/15/
@@ -77,8 +46,8 @@ def getNodeApp2():
    
     #status_code = response.status_code
     json_response = response.json()
-    authors = json_response['data']
-
+    authors = json_response['results']
+    print(authors)
     return authors
 
 def getNodeAuthors_Yoshi():
@@ -94,7 +63,6 @@ def getNodeAuthors_Yoshi():
     # response = requests.get(url, headers=headers)
     json_response = response.json()
     authors = json_response['items']
-
     return authors
 
 
@@ -117,32 +85,19 @@ def getNodeAuthor_Yoshi(author_id):
 # getNodeAuthor_Yoshi('29c546d45f564a27871838825e3dbecb')
 
 def getNodeAuthor_social_distro(author_id):
-    url = 'https://social-distro.herokuapp.com/api/authors/'
+    url = 'https://social-distro.herokuapp.com/api/authors/https://social-distro.herokuapp.com/authors/'
 
-    url = url + author_id + '/'
+    url = url + author_id
 
-    response = requests.get(url,auth=("team15","team15"))
+    response = requests.get(url)
     status_code = response.status_code
    
     if status_code == 200:
         json_response = response.json()
-        json_response = json.dumps(clean_dict(json_response))
 
         return(json_response, status_code)
     else: return (None, status_code)
 
-def getNodeAuthors_social_distro():
-    url = 'https://social-distro.herokuapp.com/api/authors/'
-
-    response = requests.get(url,auth=("team15","team15"))
-    status_code = response.status_code
-    # response = requests.get(url, headers=headers)
-    json_response = response.json()
-
-    # clean the response
-    authors = json.dumps(clean_list(json_response['results']))
-
-    return authors
 
 ####### GET POSTS
 
@@ -194,14 +149,14 @@ def getNodePost_social_distro(author_id):
     url = 'https://social-distro.herokuapp.com/api/authors/'
 
     url = url + author_id + '/posts/'
-    username = 'team15'
-    password = 'team15'
+    username = 'remote1'
+    password = 'r3mot31'
     #remote1:r3mot31
 
     session = requests.Session()
     session.auth = (username, password)
 
-    auth = session.post(url)
+    auth = session.post(hosturl)
     response = session.get(url)
     
     # credentials = f'{username}:{password}'
@@ -214,9 +169,6 @@ def getNodePost_social_distro(author_id):
     status_code = response.status_code
     if status_code == 200:
         json_response = response.json()
-        
-        json_response = json.dumps(clean_list(json_response['results']))
-
         return(json_response)
 
 # import socket

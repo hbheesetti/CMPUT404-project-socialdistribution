@@ -100,7 +100,7 @@ function PROFILE() {
 		const url = `authors/${author_id}/`;
 		reqInstance({ method: "post", url: url, data: { github: giturl } })
 			.then((res) => {
-				notifySuccessPost("successfully upadated the git url");
+				notifySuccessPost("successfully upadated the giturl");
 			})
 			.catch((err) => notifyFailedPost(err));
 	}

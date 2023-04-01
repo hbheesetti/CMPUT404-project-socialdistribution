@@ -7,7 +7,6 @@ app_name = 'authors'
 urlpatterns = [
   path('', views.AuthorsListView.as_view(), name='get_authors'),
   path('<str:pk_a>/', views.AuthorView.as_view(), name='detail'),
-  path('<str:pk_a>/github/', views.GitHubView.as_view(), name='github'),
   path('<str:pk_a>/inbox/', views.Inbox_list.as_view(), name='inbox'),
   path('<str:pk_a>/followers/', views.FollowersView.as_view(), name="get_followers"),
   path('<str:pk_a>/followers/<str:pk>/', views.FollowersView.as_view(), name="follow"),
