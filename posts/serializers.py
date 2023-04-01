@@ -57,7 +57,7 @@ class PostSerializer(WritableNestedModelSerializer):
             'published',
             'visibility',
             #'unlisted',
-            #'is_github'
+            'is_github',
         ]
 
 class CommentSerializer(serializers.ModelSerializer):

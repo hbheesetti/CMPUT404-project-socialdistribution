@@ -29,6 +29,9 @@ from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from client import *
+from django.core.paginator import Paginator
+from social.pagination import CustomPagination
+from posts.github.utils import get_github_activities
 
 custom_parameter = openapi.Parameter(
     name='custom_param',
@@ -217,13 +220,13 @@ class AuthorsListView(APIView, PageNumberPagination):
         data_list = serializer.data
         
         # get remote authors and add to list
-        yoshi = getNodeAuthors_Yoshi()
-        for yoshi_author in yoshi:
-            data_list.append(yoshi_author)
-        social_distro = getNodeAuthors_social_distro()
-        for social_distro_author in social_distro:
-            data_list.append(social_distro_author)
-        
+        # yoshi = getNodeAuthors_Yoshi()
+        # for yoshi_author in yoshi:
+        #     data_list.append(yoshi_author)
+        #social_distro = getNodeAuthors_social_distro()
+        #for social_distro_author in social_distro:
+        #    data_list.append(social_distro_author)
+
         # paginate + send
         return self.get_paginated_response(data_list)
 
@@ -418,6 +421,19 @@ class FollowersView(APIView):
         
         # return the new list of followers
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class GitHubView(APIView):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk_a):
+        author = get_object_or_404(Author,pk=pk_a)
+
+        github_posts = get_github_activities(author.github, author)
+
+        serializer = PostSerializer(github_posts,many=True)
+        
+        return Response(serializer.data)        
 
 #request_body=openapi.Schema( type=openapi.TYPE_STRING,description='A raw text input for the POST request'))
 class FriendRequestView(APIView):
@@ -534,8 +550,7 @@ class Inbox_list(APIView, InboxSerializerObjects, PageNumberPagination):
         serializer = InboxSerializer(data=inbox_data, context = {"serializer":self.serialize_inbox_objects}, many=True)
         serializer.is_valid()
         data = self.get_items(pk_a, serializer.data)
-        # TODO: Fix pagination
-        return self.get_paginated_response(data)
+        return Response(data, status=status.HTTP_200_OK)
     
     
     @swagger_auto_schema(responses = InboxPOST, operation_summary="Post a new object to the inbox",request_body=openapi.Schema( type=openapi.TYPE_STRING,description='A raw text input for the POST request', example = {
@@ -603,8 +618,7 @@ class Inbox_list(APIView, InboxSerializerObjects, PageNumberPagination):
         dict = {"type":"inbox", "author": settings.APP_NAME + '/authors/' + pk_a }
         items = []
         for item in data:
-            items.append(item["content_object"])
-
+            items.append(item["content_object"]) 
         dict["items"] = items
         return(dict) 
 
