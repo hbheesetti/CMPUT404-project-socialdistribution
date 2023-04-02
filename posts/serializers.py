@@ -64,18 +64,44 @@ class PostSerializer(WritableNestedModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     type = serializers.CharField(default="comment",source="get_api_type",read_only=True)
-    id = serializers.URLField(source="get_public_id",read_only=True)
+    #id = serializers.URLField(source="get_public_id",read_only=True)
     author = AuthorSerializer()
+    object = serializers.URLField(source="get_object",read_only=True)
 
     def create(self, validated_data):
-        author = AuthorSerializer.extract_and_upcreate_author(None,author_id=self.context["author_id"])
+        author = validated_data["author"]
         id = validated_data.pop('id') if validated_data.get('id') else None
+        comment = validated_data["comment"]
         
-        if not id:
-            id = self.context["id"]
-        comment = Comment.objects.create(**validated_data, author = author, id = id, post=self.context["post"])
+       # if not id:
+        #    id = self.context["id"]
+        comment = Comment.objects.create(author = author,  comment = comment, post=validated_data.get("object"))
         comment.save()
+
         return comment
+    
+    def to_internal_value(self, data):
+        print("to_internal_value")
+        author = AuthorSerializer.extract_and_upcreate_author(author=self.context["author"])
+        # object = Author.objects.get(id=self.context["object"])
+        object = self.context["object"]
+        comment = self.context["comment"]
+
+        # Perform the data validation.
+        if not author:
+            raise serializers.ValidationError({
+                'author': 'This field is required.'
+            })
+        if not object:
+            raise serializers.ValidationError({
+                'object': 'This field is required.'
+            })
+        
+        return {
+            'object': object,
+            'author': author,
+            'comment':comment,
+        }
 
     class Meta:
         model = Comment
@@ -85,7 +111,7 @@ class CommentSerializer(serializers.ModelSerializer):
             'comment',
             'contentType',
             'published',
-            'id',       
+            'object',       
         ]
 
 class LikeSerializer(serializers.ModelSerializer):

@@ -114,7 +114,7 @@ class Comment(models.Model):
     id = models.CharField(primary_key=True, editable=False, default= uuid.uuid4, max_length=255)  # ID of comment
     url = models.URLField(editable=False, max_length=500)  # URL of comment
     author = models.ForeignKey(Author, related_name = 'comments', on_delete=models.CASCADE)  # author of comment
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)  # post of the commenT
+    post = models.URLField(max_length=500)  # post of the commenT
     comment = models.TextField()  # the comment
     published = models.DateTimeField(auto_now_add=True)  # date published
     contentType = models.CharField(choices=content_types, default=PLAIN, max_length=20)  # type of content
@@ -132,6 +132,9 @@ class Comment(models.Model):
         self.url = url if url.endswith('/') else url + '/'
         self.save()
         return self.url
+    
+    def get_object(self):
+        return self.post if self.post.endswith('/') else self.post + '/' 
     
     @staticmethod
     def get_api_type():

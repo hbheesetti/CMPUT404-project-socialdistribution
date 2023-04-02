@@ -110,3 +110,15 @@ def getRemoteAuthorsDisplayName(displayName):
     author3 = checkDisplayName(getNodeAllAuthors_distro(), displayName)
     authorList = author1 + author2 + author3
     return authorList
+
+
+def check_author(author_id):
+    '''Checks if the author exists on any of our remote connections'''
+    response1, code1 = getNodeAuthor_Yoshi(author_id)
+    response2, code2 = getNodeAuthor_social_distro(author_id)
+    if code1 == 200:
+        return response1, code1
+    if code2 == 200:
+        return response2, code2
+    
+

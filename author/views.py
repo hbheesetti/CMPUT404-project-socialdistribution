@@ -515,7 +515,12 @@ class InboxSerializerObjects:
             # context={'author_id': data["author_id"]}
         elif type1 == Comment.get_api_type():
             serializer = CommentSerializer
-            context={'author_id': pk_a,'id':data["id"].split("/")[-1]}
+            author = data.get("author")
+            comment = data.get("comment")
+            object = data.get("object")
+           # context={'author': author,'id':data["id"].split("/")[-1]}
+            context={'author': author, 'object':object,'comment':comment}
+            return serializer(data={}, context=context, partial=True)
         elif type1 == FollowRequest.get_api_type():
             print("deser follow")
             serializer = FollowRequestSerializer

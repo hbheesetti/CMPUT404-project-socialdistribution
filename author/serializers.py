@@ -4,7 +4,7 @@ from rest_framework import serializers, exceptions
 from .models import *
 from django.http import HttpResponse
 import client
-from Remote.Authors import getNodeAuthor_App2
+from Remote.Authors import *
 
 class AuthorSerializer(serializers.ModelSerializer):
     type = serializers.CharField(default="author",source="get_api_type",read_only=True)
@@ -24,13 +24,31 @@ class AuthorSerializer(serializers.ModelSerializer):
             try:
                 return Author.objects.get(id=author_id)
             except Author.DoesNotExist:
+                
                 raise exceptions.ValidationError("Author does not exist")
         try:
             print("AUTHOR ID", author["id"])
             id = author["id"].split("/")[-1]
             updated_author = Author.objects.get(id=id)
         except Author.DoesNotExist:
-            updated_author = Author(**author)
+           # response,code = check_author(id)
+           # print(code)
+           # if code == 200:
+               # updated_author = Author(response)
+                
+            if "type" in author:
+                del author["type"]
+            if "pronouns" in author:
+                del author["pronouns"]
+            if "email" in author:
+                del author["email"]
+            if "about" in author:
+                del author["about"]
+            #print(Author.objects.get(**author))
+            #Done so same authro can comment multiple times, not sure if 100% working tho
+            updated_authorr = Author(**author)
+            updated_author = updated_authorr
+            updated_authorr.delete()
             updated_author.save()
             print("updated author saved")
         if not updated_author:
@@ -67,7 +85,7 @@ class FollowRequestSerializer(serializers.ModelSerializer):
     object = AuthorSerializer(required=False)
 
     print("DELETING")
-    FollowRequest.objects.all().delete()
+    #FollowRequest.objects.all().delete()
 
     def create(self,validated_data):
         print("in follow req create")
