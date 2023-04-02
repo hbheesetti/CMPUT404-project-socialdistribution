@@ -157,7 +157,7 @@ class Like(models.Model):
         return self.object if self.object.endswith('/') else self.object + '/' 
 
     def get_summary(self):
-        return self.author.displayName + " Likes your " + str(self.object).split('/')[-2][:-1]
+        return self.author.displayName + " Likes your post" 
 
     @staticmethod
     def get_api_type():
