@@ -863,8 +863,8 @@ class CommentView(APIView, PageNumberPagination):
         post = Post.objects.get(id=pk)
         post_data = PostSerializer(post).data
         # filter for all comments on specific post
-        comments = Comment.objects.filter(post=post)
-
+        comments = Comment.objects.filter(post=post_data['source']) #Changed cause i changed the comment model , post is now the source url of the post, not the post object, done to match with spec
+   
         authenticated_user = Author.objects.get(id=pk_a)
         
         # on private posts, friends' comments will only be available to me.
