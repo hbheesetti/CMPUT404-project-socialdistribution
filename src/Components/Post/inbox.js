@@ -64,6 +64,13 @@ function INBOX() {
 		}
 	};
 
+	const handleGithubClick = () => {
+		if (curPage !== "github") {
+			setCurPage("github");
+			navigate("/github");
+		}
+	};
+
 	async function handleLogoutClick() {
 		reqInstance.post("dlogout/").then((res) => {
 			if (res.status === 202) {
@@ -107,6 +114,9 @@ function INBOX() {
 							Clear Inbox
 						</Nav.Item>
 					</Nav.Menu>
+				</Nav>
+				<Nav pullRight>
+					<Nav.Item onClick={handleGithubClick}>Github</Nav.Item>
 				</Nav>
 				<Nav pullRight>
 					<Nav.Item onClick={handleProfileClick}>Profile</Nav.Item>

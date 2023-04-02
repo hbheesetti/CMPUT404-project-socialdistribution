@@ -18,6 +18,7 @@ import ADD_FRIEND_MODAL from "../Modals/AddFriendModal";
 import {
 	getAuthorId,
 	getCsrfToken,
+	getCurrentUser,
 	getProfileImageUrl,
 	setCurrentUser,
 } from "../utils/auth";
@@ -81,6 +82,20 @@ function PROFILE() {
 		setOpen(false);
 	};
 
+	const handleGithubClick = () => {
+		if (curPage !== "github") {
+			setCurPage("github");
+			navigate("/github");
+		}
+	};
+
+	const handleExploreClick = () => {
+		if (curPage !== "explore") {
+			setCurPage("explore");
+			navigate("/explore");
+		}
+	};
+
 	const notifySuccessPost = (message) => {
 		toaster.push(<Message type="success">{message}</Message>, {
 			placement: "topEnd",
@@ -100,6 +115,7 @@ function PROFILE() {
 		const url = `authors/${author_id}/`;
 		reqInstance({ method: "post", url: url, data: { github: giturl } })
 			.then((res) => {
+				setCurrentUser(res.data).then(setCount(count + 1));
 				notifySuccessPost("successfully upadated the git url");
 			})
 			.catch((err) => notifyFailedPost(err));
@@ -138,6 +154,12 @@ function PROFILE() {
 				</Nav>
 				<Nav pullRight>
 					<Nav.Item onClick={handleInboxClick}>Inbox</Nav.Item>
+				</Nav>
+				<Nav pullRight>
+					<Nav.Item onClick={handleGithubClick}>Github</Nav.Item>
+				</Nav>
+				<Nav pullRight>
+					<Nav.Item onClick={handleExploreClick}>Explore</Nav.Item>
 				</Nav>
 				<Nav pullRight>
 					<Nav.Item>Profile</Nav.Item>

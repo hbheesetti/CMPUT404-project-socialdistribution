@@ -21,7 +21,7 @@ from client import *
 from django.core.paginator import Paginator
 from social.pagination import CustomPagination
 from posts.github.utils import get_github_activities
-from Remote.Authors import getRemoteAuthorsDisplayName
+from Remote.Authors import *
 
 custom_parameter = openapi.Parameter(
     name='custom_param',
@@ -200,7 +200,7 @@ class AuthorsListView(APIView, PageNumberPagination):
         }
         
         # create a list of our own authors
-        authors = Author.objects.filter(host=(settings.APP_NAME+'/'))
+        authors = Author.objects.filter(host=(settings.HOST_NAME))
         serializer = AuthorSerializer(authors, many=True)
         data_list = serializer.data
         # get remote authors and add to list
@@ -240,29 +240,10 @@ class AuthorView(APIView):
             author = Author.objects.get(pk=pk_a)
         # if local author isn't there, see if it's from remote
         except Author.DoesNotExist:
-            try: 
-                # get yoshi's author at node
-                author_json, status_code = getNodeAuthor_Yoshi(pk_a)
-                if status_code == 200:
-                    author_dict = json.loads(author_json)
-                    author = Author(id = author_json['authorId'], displayName= author_json['displayname'], url=author_json['url'], profileImage=author_json['profileImage'], github=author_json['github'], host=author_json['host'])
-                    return Response(author_json)
-                # get social distro's authors and format their data to our style
-                else:
-                    author_json, status_code = getNodeAuthor_social_distro(pk_a)
-                    if status_code == 200:
-                        # formatting (theirs is nonetype while ours is empty string)
-                        if author_json['profileImage'] == None:
-                            profileImage = ''
-                        if author_json['github'] == None:
-                            github = ''
-                        author = Author(id = pk_a, displayName= author_json['displayName'], url=author_json['url'], profileImage=profileImage, github=github, host=author_json['host'])
-                    else:
-                        error_msg = "Author id not found"
-                        return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
-            except Exception as e:
-                print(e)
-                # author is not found, so 404
+            author, found = getRemoteAuthorsById(pk_a)
+            if found == True:
+                return Response(author, status=status.HTTP_200_OK)
+            else:
                 error_msg = "Author id not found"
                 return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
         # return the data

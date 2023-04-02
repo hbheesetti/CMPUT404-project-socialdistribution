@@ -47,7 +47,7 @@ export let createReqInstance = (baseUrl) => {
 			password = "team24";
 			break;
 		case "https://killme.herokuapp.com/":
-			username = "app2team15";
+			username = "app1team15";
 			password = "hari1234";
 			break;
 		default:

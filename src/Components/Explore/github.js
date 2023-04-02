@@ -8,9 +8,9 @@ import LIKEINBOX from "../Post/LikeInbox";
 import ADD_FRIEND_MODAL from "../Modals/AddFriendModal";
 import POST from "../Post/Post";
 import COMMENTINBOX from "../Post/CommentInbox";
-import { unsetCurrentUser } from "../utils/auth";
+import { getAuthorId, getCurrentUser, unsetCurrentUser } from "../utils/auth";
 
-function EXPLORE() {
+function GITHUB() {
 	const [inbox, setInbox] = useState([]);
 	const [curPage, setCurPage] = useState("inbox");
 	const [open, setOpen] = useState(false);
@@ -21,15 +21,18 @@ function EXPLORE() {
 		if (!localStorage.getItem("loggedIn")) {
 			navigate("/signin");
 		} else {
-			const url = `posts/public`;
-			reqInstance({
-				method: "get",
-				url: url,
-				params: { local: true },
-			}).then((res) => {
-				console.log(res);
-				setInbox(res.data);
-			});
+			const author_id = getAuthorId();
+			const user = getCurrentUser();
+			if (user["github"] !== "") {
+				const url = ` authors/${author_id}/github/`;
+				reqInstance({
+					method: "get",
+					url: url,
+				}).then((res) => {
+					console.log(res);
+					setInbox(res.data);
+				});
+			}
 		}
 	}, []);
 
@@ -50,13 +53,6 @@ function EXPLORE() {
 		if (curPage !== "explore") {
 			setCurPage("explore");
 			navigate("/explore");
-		}
-	};
-
-	const handleGithubClick = () => {
-		if (curPage !== "github") {
-			setCurPage("github");
-			navigate("/github");
 		}
 	};
 
@@ -95,8 +91,8 @@ function EXPLORE() {
 					></Nav.Menu>
 				</Nav>
 				<Nav pullRight>
-					<Nav.Item onClick={handleGithubClick}>Github</Nav.Item>
-				</Nav>`1`
+					<Nav.Item>Github</Nav.Item>
+				</Nav>
 				<Nav pullRight>
 					<Nav.Item onClick={handleProfileClick}>Profile</Nav.Item>
 				</Nav>
@@ -113,4 +109,4 @@ function EXPLORE() {
 	);
 }
 
-export default EXPLORE;
+export default GITHUB;

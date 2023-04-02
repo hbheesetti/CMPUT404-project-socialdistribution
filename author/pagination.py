@@ -31,6 +31,6 @@ class ViewPaginatorMixin(object):
           objects = paginator.page(paginator.num_pages)
       data = {
           'type': "authors",
-          'data': list(objects)
+          'items': list(objects)
       }
       return data

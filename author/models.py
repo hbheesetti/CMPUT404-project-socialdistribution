@@ -69,7 +69,7 @@ class Inbox(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.CharField(blank=True, null=True,max_length=255)
     content_object = GenericForeignKey('content_type', 'object_id')
-    published = models.DateTimeField(auto_now_add=True, editable=False)  # date published
+    published = models.DateTimeField(auto_now_add=True, editable=False)  # date pubslished
 
     def __str__(self):
         return self.id
@@ -85,6 +85,7 @@ class Inbox(models.Model):
         ordering = ['-published']
 
 class FollowRequest(models.Model):
+    id = models.CharField(primary_key=True, editable=False, default= uuid.uuid4, max_length=255)
     #type =models.CharField(max_length=255, blank=True)
     actor = models.ForeignKey(Author, related_name='actor', on_delete=models.CASCADE)
     object = models.ForeignKey(Author, related_name='object', on_delete=models.CASCADE)

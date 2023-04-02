@@ -18,6 +18,7 @@ from drf_yasg.utils import swagger_auto_schema
 import base64
 from client import *
 from .image_renderer import JPEGRenderer, PNGRenderer
+from Remote.Post import *
 
 
 custom_parameter = openapi.Parameter(
@@ -541,7 +542,7 @@ class post_list(APIView, PageNumberPagination):
         if serializer.is_valid():
             post = serializer.save()
             # pass in the shared authors on post creation and share to other users' inboxes
-            share_object(post,author,request.data['authors'])
+            share_object(post,author,request.data['authors'], serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         # 400 on incorrect serializer data
         else:
@@ -980,15 +981,22 @@ class PublicPostsView(APIView):
         
         
 # share a post to an inbox
-def share_object(item, author, shared_user):
+# post = item 
+def share_object(item, author, shared_user, data):
     inbox_item = Inbox(content_object=item, author=author)
     inbox_item.save()
 
     # friend post (send to friend inbox)
     if (item.visibility == 'FRIENDS'):
         for friend in author.friends.all():
-            inbox_item = Inbox(content_object=item, author=friend)
-            inbox_item.save()
+            #check the host to see if the friend is a foreign and send post to them.
+            friend_id = friend.id
+            host = friend.host
+            if host != settings.HOST_NAME:
+                sendPost(host, data, friend_id)
+            else:
+                inbox_item = Inbox(content_object=item, author=friend)
+                inbox_item.save()
 
     # unlisted post (send only to own inbox)
     elif (item.visibility == 'UNLISTED'):
@@ -1000,5 +1008,8 @@ def share_object(item, author, shared_user):
     elif (item.visibility == 'PRIVATE'):
         for id in shared_user:
             share = Author.objects.get(id=id)
+            host = share.host
+            if host != settings.HOST_NAME:
+                sendPost(host, data, id)
             inbox_item = Inbox(content_object=item, author=share)
             inbox_item.save()

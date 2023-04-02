@@ -71,3 +71,56 @@ def getAllPublicPosts():
     posts3 = getAllPosts_Distro()
     posts = posts1+ posts2 + posts3
     return posts
+
+def sendPost(host, data, auth_id):
+    if 'yoshi' in host:
+        response, status_code = sendPostYoshi(data, auth_id)
+    elif 'social-distro' in host:
+        response, status_code = sendPostDistro(data, auth_id)
+    elif 'killme' in host:
+        response, status_code = sendPostApp2(data, auth_id)
+    return response
+
+def sendPostYoshi(data, auth_id):
+    url = 'https://yoshi-connect.herokuapp.com/authors/' + auth_id + '/inbox'
+
+
+    #update the data to be sent in proper format maybe
+    
+    response = requests.post(url=url, headers=yoshi_headers(), data=data)
+    status_code = response.status_code
+    json_response = response.json()
+    return json_response, status_code
+
+def sendPostDistro(data, auth_id):
+    url = 'https://social-distro.herokuapp.com/api/authors/' + auth_id + '/inbox'
+    #setup data
+    response = requests.post(url=url, headers=distro_headers(), data=data)
+    status_code = response.status_code
+    json_response = response.json()
+    return json_response, status_code
+
+
+def sendPostApp2(data, auth_id):
+    url = 'https://killme.herokuapp.com/authors/' + auth_id + '/inbox'
+    #setup data
+    response = requests.post(url=url, headers=app2_headers(), data=data)
+    status_code = response.status_code
+    json_response = response.json()
+    return json_response, status_code
+
+# url = 'https://killme.herokuapp.com/authors/'
+#     hosturl = "https://killme.herokuapp.com/"
+
+#     username = 'app1team15'
+#     password = 'hari1234'
+
+#     session = requests.Session()
+#     session.auth = (username, password)
+
+#     auth = session.post(hosturl)
+#     response = session.get(url)
+
+#     json_response = response.json()
+#     authors = json_response['data']
+#     return authors

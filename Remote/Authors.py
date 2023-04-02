@@ -113,6 +113,7 @@ def getRemoteAuthorsDisplayName(displayName):
     return authorList
 
 
+
 def check_author(author_id):
     '''Checks if the author exists on any of our remote connections'''
     response1, code1 = getNodeAuthor_Yoshi(author_id)
@@ -138,3 +139,31 @@ def clean_author(author):
     
 
 
+def getRemoteAuthorsById(id):
+    author1, found = checkId(getNodeAllAuthors_Yoshi(), id)
+    if found == False:
+        author2, found = checkId(getNodeAllAuthors_App2(), id)
+        if found == False:
+            author3, found = checkId(getNodeAllAuthors_distro(), id)
+            if found == False:
+                return "author not found", False
+            else:
+                return author3, True
+        else:
+            return author2, True
+    else:
+        return author1, True
+
+def checkId(list, id):
+    author = {}
+    found = False
+    for item in list:
+        item_id = getAuthorId(item["id"])
+        if item_id == id:
+            author = item
+            found = True
+    return author, found
+
+def getAuthorId(url):
+    arr = url.split("/")
+    return arr[-1]
