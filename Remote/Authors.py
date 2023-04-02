@@ -2,6 +2,7 @@ import requests
 import base64
 from rest_framework.response import Response
 from rest_framework import status
+from author.models import *
 
 def getNodeAuthor_social_distro(author_id):
     url = 'https://social-distro.herokuapp.com/api/authors/'
@@ -121,4 +122,19 @@ def check_author(author_id):
     if code2 == 200:
         return response2, code2
     
+
+def clean_author(author):
+    if type(author) is dict:
+       
+        if "type" in author:
+            del author["type"]
+        if "pronouns" in author:
+            del author["pronouns"]
+        if "email" in author:
+            del author["email"]
+        if "about" in author:
+            del author["about"]
+        return author
+    
+
 

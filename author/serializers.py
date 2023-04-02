@@ -35,15 +35,10 @@ class AuthorSerializer(serializers.ModelSerializer):
            # print(code)
            # if code == 200:
                # updated_author = Author(response)
-                
-            if "type" in author:
-                del author["type"]
-            if "pronouns" in author:
-                del author["pronouns"]
-            if "email" in author:
-                del author["email"]
-            if "about" in author:
-                del author["about"]
+
+           #decoupled
+            author = clean_author(author)
+      
             #print(Author.objects.get(**author))
             #Done so same authro can comment multiple times, not sure if 100% working tho
             updated_authorr = Author(**author)
