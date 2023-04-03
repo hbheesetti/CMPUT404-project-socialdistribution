@@ -17,10 +17,7 @@ function COMMENTINBOX({ obj }) {
 					fontSize: "20px",
 				}}
 			>
-				{comment.author["displayName"] +
-					" commented " +
-					comment.comment +
-					" on your post"}
+				{comment}
 			</div>
 		</Panel>
 	);

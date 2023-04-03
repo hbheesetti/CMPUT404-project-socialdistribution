@@ -183,9 +183,8 @@ function POST({ postobj, edit, explore, github }) {
 
 			{edit ? delEditBtn : <div />}
 		</div>
-	);
 
-	const likesmodal = <LIKESMODAL postobj={postobj} />;
+	);
 
 	return (
 		<div>
@@ -221,6 +220,9 @@ function POST({ postobj, edit, explore, github }) {
 					</div>
 					{body()}
 				</div>
+				<div>
+					{explore ? <LIKESMODAL style={{ float: "right", marginRight: "10px" }} postobj={postobj} /> : <div />}
+				</div>
 				{!github ?
 					< Panel bordered collapsible header="Comments">
 						<COMMENTS postobj={postobj}></COMMENTS>
@@ -235,7 +237,6 @@ function POST({ postobj, edit, explore, github }) {
 						handleClose={handleModalClose}
 					/> : <div />
 			}
-			{explore ? likesmodal : <div />}
 		</div >
 	);
 }

@@ -124,21 +124,16 @@ class Comment(models.Model):
     # get public id of comment
     def get_public_id(self):
         self.get_absolute_url()
-        return (self.url[:-1]) or str(self.id)
+        return (self.url) or str(self.id)
     
     def get_object(self):
-        return self.post if self.post.endswith('/') else self.post + '/' 
+        return self.post[:-1] if self.post.endswith('/') else self.post 
     
     def get_absolute_url(self):
-        print(self.id)
-        print(self.post)
-        self.post = self.post[:-1] if self.post.endswith('/') else self.post
-        print(self.post)
         post = Post.objects.get(id=str(self.post.split("/")[-1]))
         url = reverse('posts:comment_detail', args=[post.id, str(self.post.split("/")[-1]), str(self.id)])
-        print("Comment recieved")
         url = settings.APP_NAME + url
-        self.url = url if url.endswith('/') else url + '/'
+        self.url = url[:-1] if url.endswith('/') else url
         self.save()
         return self.url
     
@@ -150,24 +145,27 @@ class Comment(models.Model):
         ordering = ['-published']
 
     def __str__(self):
-        return 'Comment by {}'.format(self.author)
+        post = Post.objects.get(id=str(self.post.split("/")[-1]))
+        return 'Comment by {} on Your Post {}'.format(self.author, post.title) 
     
 class Like(models.Model):
     id = models.CharField(primary_key=True, editable=False, default= uuid.uuid4, max_length=255)  # ID of like
-    summary = models.CharField (max_length=100, default='')
     author = models.ForeignKey(Author, related_name = 'likes', on_delete=models.CASCADE)  # author of like
     object = models.URLField(max_length=500)  # URL of liked object
     inbox = GenericRelation(Inbox, related_query_name='like')  # inbox in which like is in
+    summary = models.CharField (max_length=100, default='')
 
     def get_object(self):
-        return self.object if self.object.endswith('/') else self.object + '/' 
+        return self.object[:-1] if self.object.endswith('/') else self.object 
 
-    def get_summary(self):    
-        return self.author.displayName + " Likes your " + str(self.object).split('/')[-2][:-1]
+    def get_summary(self):   
+        print("PRIVATE",self.object.split('/')[-1]) 
+        title = Post.objects.get(id=self.object.split('/')[-1]).title        
+        return self.author.displayName + " Likes your " + str(self.object).split('/')[-2][:-1] + " '" + '{}'.format(title)+"'"
 
     @staticmethod
     def get_api_type():
         return 'Like'
     
     def __str__(self):
-        return 'Liked by {}'.format(self.author)    
+        return 'Your Post was Liked by {}'.format(self.author)    
