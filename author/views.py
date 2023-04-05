@@ -463,12 +463,15 @@ class FriendRequestView(APIView):
             error_msg = "Author not found"
             return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
         try:
-            actor_author = Author.objects.get(id=request["actor_id"])
+            actor_id = request["actor_id"][-1] if request["actor_id"].endswith('/') else request["actor_id"]
+            actor_id = actor_id.split('/')[-1]
+            print("actor id is", actor_id)
+            actor_author = Author.objects.get(id=actor_id)
             # author = Author.objects.get(id=request.data["author_id"])
         except Author.DoesNotExist:
             error_msg = "Actor author sent not found"
             return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
-        FollowRequest.objects.get(object=author,actor=actor_author).delete()
+        FollowRequest.objects.filter(object=author,actor=actor_author).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class ViewRequests(APIView):
