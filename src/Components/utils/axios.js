@@ -21,6 +21,7 @@ export let reqInstance = axios.create({
 	},
 });
 
+
 export let axiosInstance = axios.create({
 	headers: {
 		"X-CSRFToken": token,
@@ -33,21 +34,9 @@ export let axiosInstance = axios.create({
 
 export let createReqInstance = (baseUrl) => {
 	let username, password;
+	console.log(baseUrl);
 	switch (baseUrl) {
 		case process.env.REACT_APP_HOST_NAME + "/":
-			username = localStorage.getItem("username");
-			password = localStorage.getItem("password");
-			return axios.create({
-				headers: {
-					"X-CSRFToken": token,
-				},
-				baseURL: baseUrl,
-				auth: {
-					username: username,
-					password: password,
-				},
-			});
-		case process.env.REACT_APP_HOST_NAME + "//":
 			username = localStorage.getItem("username");
 			password = localStorage.getItem("password");
 			return axios.create({
@@ -73,20 +62,6 @@ export let createReqInstance = (baseUrl) => {
 					password: password,
 				},
 			});
-		case "https://killme.herokuapp.com//":
-			username = "app1team15";
-			password = "hari1234";
-			return axios.create({
-				headers: {
-					"X-CSRFToken": token,
-				},
-				baseURL: baseUrl,
-				auth: {
-					username: username,
-					password: password,
-				},
-			});
-		
 		default:
 			throw new Error(`Invalid base URL: ${baseUrl}`);
 	}
