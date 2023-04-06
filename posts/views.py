@@ -936,6 +936,9 @@ class ShareView(APIView):
         # new URL 
         source = reverse('authors:share', args=[str(origin_author), str(post_id), str(author_id)]).split('share')[0]
         origin = post["origin"]
+        if type(post["categories"]) is list:
+            post["categories"] = ','.join(post["categories"])                
+
         
         new_post = Post(
         title=post["title"],
@@ -952,7 +955,7 @@ class ShareView(APIView):
         )
 
         # save the new post
-        # new_post.save()
+        new_post.save()
         # this shared_user here is blank
         # serialize post
         if "image/" in new_post.contentType:
