@@ -951,7 +951,7 @@ class ShareView(APIView):
         unlisted=post["unlisted"],
         source=source,
         origin=post["origin"],
-        github=False
+        is_github=False
         )
 
         # save the new post

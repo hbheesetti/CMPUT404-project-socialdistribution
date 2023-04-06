@@ -463,7 +463,8 @@ class FriendRequestView(APIView):
             error_msg = "Author not found"
             return Response(error_msg, status=status.HTTP_404_NOT_FOUND)
         try:
-            actor_id = request["actor_id"][-1] if request["actor_id"].endswith('/') else request["actor_id"]
+            actor_id = request["actor_id"]
+            actor_id = actor_id[-1] if actor_id.endswith('/') else actor_id
             actor_id = actor_id.split('/')[-1]
             print("actor id is", actor_id)
             actor_author = Author.objects.get(id=actor_id)
