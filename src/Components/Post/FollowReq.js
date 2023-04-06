@@ -44,7 +44,7 @@ function FOLLOWREQ({ obj }) {
 		const url2 = obj;
 
 		const params = { actor_id: FAID };
-		const url = `${curr_author_id}/sendreq/`;
+		const url = `authors/${curr_author_id}/sendreq/`;
 		return reqInstance({ method: "delete", url: url, data: params })
 			.then((res) => { 
 			})
