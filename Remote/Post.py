@@ -23,7 +23,7 @@ def getAllPosts_app2():
     status_code = response.status_code
     if status_code == 200:
         json_response = response.json()
-        json_response = json_response[:5]
+        json_response= json_response["items"]
         return(json_response)
     else: return ([])
 
