@@ -40,6 +40,7 @@ def getAllPosts_Yoshi():
         json_response = response.json()
         json_response = json_response['items']
         json_response = json_response[:5]
+        print(json_response)
         return(json_response)
     else: 
         return []
@@ -63,6 +64,7 @@ def getAllPublicPosts():
     posts1 = getAllPosts_app2()
     posts2 = getAllPosts_Yoshi()
     posts5 = getAllPosts_big()
+    print("yoshi,", posts2)
     posts =  posts1+posts5+posts2
     print("all", posts)
     return posts
@@ -249,4 +251,3 @@ def staticPost() :
     json_response = response.json()
     print("YOSHI content", json_response)
     return json_response, status_code
-
