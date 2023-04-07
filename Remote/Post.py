@@ -63,6 +63,7 @@ def getAllPublicPosts():
     posts1 = getAllPosts_app2()
     posts2 = getAllPosts_Yoshi()
     posts5 = getAllPosts_big()
+    print("yoshi", posts2)
     posts =  posts1+posts5+posts2
     print("all", posts)
     return posts
