@@ -972,7 +972,7 @@ class PublicPostsView(APIView):
             data_list = data_list + remotePosts
             print("datalist", data_list)
             data_list.sort(key=lambda x: x['published'])
-        return Response(ViewPaginatorMixin.paginate(self,object_list=data_list, type="public posts",page=int(self.request.GET.get('page', 1)), size=int(self.request.GET.get('size', 50))))
+        return Response(ViewPaginatorMixin.paginate(self,object_list=data_list, type="public posts",page=int(self.request.GET.get('page', 1)), size=int(self.request.GET.get('size', 100))))
     
         
 # share a post to an inbox
