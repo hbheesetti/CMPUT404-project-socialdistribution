@@ -88,7 +88,7 @@ def sendPost(host, data, auth_id):
     print(auth_id)
     
     response = Response("r")
-    if 'killme' in host:
+    if 'sociallydistributed' in host:
         response, status_code = sendPostApp2(data, auth_id)
     print("returning their response")
     return response
