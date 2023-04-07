@@ -19,7 +19,7 @@ def getAllPosts_app2():
     url = 'https://sociallydistributed.herokuapp.com/posts/public'
 
     headers = app2_headers()
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=(headers,))
     status_code = response.status_code
     if status_code == 200:
         json_response = response.json()

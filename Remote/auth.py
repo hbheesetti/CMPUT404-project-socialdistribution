@@ -6,7 +6,7 @@ def app2_headers():
     credentials = f'{username}:{password}'
     encoded_credentials = base64.b64encode(credentials.encode("utf-8")).decode("utf-8")
     authorization_header = f'Basic {encoded_credentials}'
-    headers = {'Authorization': authorization_header}
+    headers = {'Authorization': authorization_header, 'Content-Type': 'application/json'}
     return headers
 
 def distro_headers():
