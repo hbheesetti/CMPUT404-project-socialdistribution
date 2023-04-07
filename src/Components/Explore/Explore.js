@@ -16,7 +16,6 @@ function EXPLORE() {
 	const [curPage, setCurPage] = useState("inbox");
 	const [open, setOpen] = useState(false);
 	const [local, setLocal] = useState([]);
-	const [yoshi, setYoshi] = useState([]);
 	let navigate = useNavigate();
 
 	// Gets all the 

@@ -44,19 +44,6 @@ export let createReqInstance = (baseUrl) => {
 					password: password,
 				},
 			});
-		case "https://yoshi-connect.herokuapp.com/":
-			username = "minion-yoshi";
-			password = "123";
-			return axios.create({
-				headers: {
-					"X-CSRFToken": token,
-				},
-				baseURL: baseUrl,
-				auth: {
-					username: username,
-					password: password,
-				},
-			});
 		case "https://sociallydistributed.herokuapp.com/":
 			username = "app2team15";
 			password = "hari1234";
@@ -70,26 +57,12 @@ export let createReqInstance = (baseUrl) => {
 					password: password,
 				},
 			});
-		case "https://killme.herokuapp.com//":
+		case "https://killme.herokuapp.com/":
 			username = "app1team15";
 			password = "hari1234";
 			return axios.create({
 				headers: {
 					"X-CSRFToken": token,
-				},
-				baseURL: baseUrl,
-				auth: {
-					username: username,
-					password: password,
-				},
-			});
-		case "https://bigger-yoshi.herokuapp.com/api/":
-			username = "man4";
-			password = "123";
-			return axios.create({
-				headers: {
-					"X-CSRFToken": token,
-					// Authorization: "Basic cDJwYWRtaW46cDJwYWRtaW4=",
 				},
 				baseURL: baseUrl,
 				auth: {
