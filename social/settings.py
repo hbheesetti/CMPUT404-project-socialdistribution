@@ -21,7 +21,7 @@ load_dotenv()
 
 mimetypes.add_type("application/javascript", ".js", True)
 
-APP_NAME = os.getenv('REACT_APP_HOST_NAME')
+APP_NAME = "https://ineedsleep.herokuapp.com"
 HOST_NAME = APP_NAME + '/'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

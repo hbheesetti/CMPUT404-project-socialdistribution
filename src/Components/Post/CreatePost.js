@@ -136,7 +136,7 @@ function CREATEPOST({ refresh }) {
 	async function handlePostClick() {
 		const author = JSON.parse(localStorage.getItem("user"));
 		const author_id = getAuthorId(null);
-		const url = `authors/${author_id}/posts/`;
+		const url = `https://ineedsleep.herokuapp.com/authors/${author_id}/posts/`;
 
 		var params = {
 			title: title,
@@ -165,6 +165,7 @@ function CREATEPOST({ refresh }) {
 
 		reqInstance({ method: "post", url: url, data: params })
 			.then((res) => {
+				console.log("post", res);
 				if (res.status === 200) {
 					setText("");
 					setDescription("");
