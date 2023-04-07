@@ -616,12 +616,7 @@ class post_detail(APIView, PageNumberPagination):
             if post.author != _:
                 return Response("Cannot edit a post you didnt create", status=status.HTTP_405_METHOD_NOT_ALLOWED)
             
-            # handle editing for image post
-            if 'image' in request.data['contentType']:
-                serializer = ImageSerializer(data=request.data, context={'author_id': pk_a}) 
-            # otherwise handle for normal post
-            else:
-                serializer = PostSerializer(post, data=request.data, partial=True)
+            serializer = PostSerializer(post, data=request.data, partial=True)
 
             # looking good?    
             if serializer.is_valid():
