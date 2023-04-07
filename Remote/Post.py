@@ -121,16 +121,6 @@ def sendPost(host, data, auth_id):
     print(data)
     print(host)
     print(auth_id)
-    # encode image from data[image] as base64 string in data[content]
-    if "image/" in data['contentType']:
-        with open("./social"+data["image"],'rb') as file:
-            # encode image
-            encoded_image = base64.b64encode(file.read())
-            # properly pad the image + cast to string
-            data['content'] = str(encoded_image)[2:-1]
-            if data['content'][-1] != '=':
-                data['content'] += '='
-    print(data)
 
     if 'yoshi-connect' in host:
         response, status_code = sendPostYoshi(data, auth_id)
