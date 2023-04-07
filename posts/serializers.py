@@ -228,14 +228,20 @@ class ImageSerializer(serializers.ModelSerializer):
             print("in the try block")
             validated_data = clean_post(validated_data)
             print("valid",validated_data)
-            post = Post(**validated_data)
-        except Exception as e:
-            print(e)
-            print("image post serializer else")
             author = AuthorSerializer.extract_and_upcreate_author(None, author_id=self.context["author_id"])
-            validated_data.pop('authors')
-            print("validated data ",validated_data)
-            post = Post.objects.create(**validated_data, author = author, id = id)
+            # validated_data.pop('authors')
+            post = Post.objects.create(**validated_data, author = author)
+        except Exception as e:
+            print("image post serializer except")
+            print(e)
+            if not author:
+                raise serializers.ValidationError({
+                    'author': 'This field is required.'
+                })
+            if not post:
+                raise serializers.ValidationError({
+                    'post': 'This field is required.'
+                })
         return post
     
     def to_representation(self, instance):
