@@ -176,7 +176,7 @@ function CREATEPOST({ refresh }) {
 					setMarkdown("");
 					setAuthors([]);
 					setDisabled(true);
-					window.location.reload();
+					// window.location.reload();
 					notifySuccessPost();
 				} else {
 					notifyFailedPost(res.data);
