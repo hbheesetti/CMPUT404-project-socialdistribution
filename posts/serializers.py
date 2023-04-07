@@ -233,7 +233,8 @@ class ImageSerializer(serializers.ModelSerializer):
             print(e)
             print("image post serializer else")
             author = AuthorSerializer.extract_and_upcreate_author(None, author_id=self.context["author_id"])
-            # validated_data.pop('authors')
+            validated_data.pop('authors')
+            print("validated data ",validated_data)
             post = Post.objects.create(**validated_data, author = author, id = id)
         return post
     
