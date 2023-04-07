@@ -99,7 +99,7 @@ TEMPLATES = [
 ALLOWED_HOSTS = ['*']
 WSGI_APPLICATION = 'social.wsgi.application'
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', HOST_NAME, "http://localhost:8000"]
-CORS_ORIGIN_WHITELIST = ['http://localhost:3000', 'http://localhost:8000', "https://sociallydistributed.herokuapp.com", "https://killme.herokuapp.com","https://yoshi-connect.herokuapp.com", "https://p2psd.herokuapp.com", "https://social-distro.herokuapp.com", "https://bigger-yoshi.herokuapp.com"]
+CORS_ORIGIN_WHITELIST = ['http://localhost:3000', 'http://localhost:8000', "https://sociallydistributed.herokuapp.com", "https://ineedsleep.herokuapp.com","https://yoshi-connect.herokuapp.com", "https://p2psd.herokuapp.com", "https://social-distro.herokuapp.com", "https://bigger-yoshi.herokuapp.com"]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = (
     'accept',

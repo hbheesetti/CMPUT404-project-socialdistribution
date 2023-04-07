@@ -16,7 +16,7 @@ params= {
 }
 
 def getAllPosts_app2():
-    url = 'https://killme.herokuapp.com/posts/public'
+    url = 'https://sociallydistributed.herokuapp.com/posts/public'
 
     headers = app2_headers()
     response = requests.get(url, headers=headers)
@@ -27,44 +27,10 @@ def getAllPosts_app2():
         json_response = json_response[:5]
         return(json_response)
     else: return ([])
-
-def getAllPosts_Yoshi():
-    url = 'https://yoshi-connect.herokuapp.com/posts/public/local'
-    headers = yoshi_headers()
-    try:
-        response = requests.get(url, headers=headers, params=params, timeout=5)
-    except requests.exceptions.Timeout:
-        return []
-    status_code = response.status_code
-    if status_code == 200:
-        json_response = response.json()
-        json_response = json_response['items']
-        json_response = json_response[:5]
-        return(json_response)
-    else: 
-        return []
-
-def getAllPosts_big():
-    url = 'https://bigger-yoshi.herokuapp.com/api/authors/posts'
-
-    response = requests.get(url, headers=big_headers())
-    print(response)
-    if response.status_code == 200:
-        print("yoshi, inside the if ")
-        json_response = response.json()
-        json_response = json_response["items"]
-        json_response = json_response[:5]
-        print("yoshi ", json_response)
-        return(json_response)
-    else: 
-        return []
     
 def getAllPublicPosts():
     posts1 = getAllPosts_app2()
-    posts2 = getAllPosts_Yoshi()
-    posts5 = getAllPosts_big()
-    print("yoshi", posts2)
-    posts =  posts1+posts5+posts2
+    posts =  posts1
     print("all", posts)
     return posts
 
@@ -122,73 +88,18 @@ def sendPost(host, data, auth_id):
     
     response = Response("r")
 
-    if 'yoshi-connect' in host:
-        response, status_code = sendPostYoshi(data, auth_id)
-    elif 'bigger-yoshi' in host:
-        if "image/" in data['contentType']:
-            data['content'] = data['source']
-        print("sending to bigger yoshi")
-        response, status_code = sendPostBiggerYoshi(data, auth_id)
-    elif 'killme' in host:
+    if 'sociallydistributed' in host:
         response, status_code = sendPostApp2(data, auth_id)
     print("returning their response")
     return response
 
-def sendPostBiggerYoshi(data, auth_id):
-    url = 'https://bigger-yoshi.herokuapp.com/api/authors/' + auth_id + '/inbox'
-
-
-    #update the data to be sent in proper format maybe
-    print("sending a request")
-    response = requests.post(url=url, json=data, headers=big_headers())
-    status_code = response.status_code
-    json_response = response.json()
-    print("got a response")
-    return json_response, status_code
-
-def sendPostYoshi(data, auth_id):
-    url = 'https://yoshi-connect.herokuapp.com/authors/' + auth_id + '/inbox'
-    if data["commentsSrc"] == []:
-        data["commentsSrc"] = {"comments":[], "id": data["comments"], "post":data["id"], "type": "comments"}
-    if data["description"] == '':
-        data["description"] = data["title"]
-    if not ('categories' in data):
-        data["categories"] = []
-    data['unlisted'] = "false"
-    
-    data = json.dumps(data)
-
-    #update the data to be sent in proper format maybe
-    response = requests.post(url=url, headers=yoshi_headers(), data=data)
-    status_code = response.status_code
-    json_response = response.json()
-    print("YOSHI content", json_response)
-    return json_response, status_code
-
-def sendPostDistro(data, auth_id):
-    url = 'https://social-distro.herokuapp.com/api/authors/' + auth_id + '/inbox'
-    #setup data
-    response = requests.post(url=url, headers=distro_headers(), data=data, timeout=10)
-    status_code = response.status_code
-    json_response = response.json()
-    return json_response, status_code
-
-
 def sendPostApp2(data, auth_id):
-    url = 'https://killme.herokuapp.com/authors/' + auth_id + '/inbox'
+    url = 'https://sociallydistributed.herokuapp.com/authors/' + auth_id + '/inbox'
     #setup data
     response = requests.post(url=url, headers=app2_headers(), data=data)
     status_code = response.status_code
     json_response = response.json()
     return json_response, status_code
-
-def sendPostP2(data, auth_id):
-    url = 'http://p2psd.herokuapp.com/authors/' + auth_id + '/inbox'
-    response = requests.post(url=url, headers=p2_headers(), data=data)
-    status_code = response.status_code
-    json_response = response.json()
-    return json_response, status_code
-
 
 def clean_post(data):
     if "type" in data:

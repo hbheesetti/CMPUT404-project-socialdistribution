@@ -73,21 +73,8 @@ params = {
 #     return authors
 
 
-def getNodeAuthor_Yoshi(author_id):
-    url = 'https://yoshi-connect.herokuapp.com/authors/'
-
-    url = url + author_id
-
-    response = requests.get(url)
-    status_code = response.status_code
-    
-    if status_code == 200:
-        json_response = response.json()
-        return(json_response)
-    else: return ([])
-
 def getNodeAuthor_App2(author_id):
-    url = 'https://killme.herokuapp.com/authors/'
+    url = 'https://sociallydistributed.herokuapp.com/authors/'
 
     url = url + author_id
 
@@ -97,32 +84,10 @@ def getNodeAuthor_App2(author_id):
     if status_code == 200:
         json_response = response.json()
         return(json_response)
-    else: return ([])
-
-
-def getNodeAuthor_big(author_id):
-    url = "https://bigger-yoshi.herokuapp.com/api/authors/" + author_id
-    response= requests.get(url, headers=big_headers())
-    status_code = response.status_code
-
-    if status_code == 200:
-        json_response = response.json()
-        return(json_response)
-    else: return ([])
-
-def getNodeAllAuthors_Yoshi():
-    url = 'https://yoshi-connect.herokuapp.com/authors'
-    response = requests.get(url, params={"size": 100}, timeout=10, headers=yoshi_headers())
-    status_code = response.status_code
-
-    if status_code == 200:
-        json_response = response.json()
-        authors = json_response['items']
-        return(authors)
     else: return ([])
 
 def getNodeAllAuthors_App2():
-    url = 'https://killme.herokuapp.com/authors/'
+    url = 'https://sociallydistributed.herokuapp.com/authors/'
 
     headers = app2_headers()
     response = requests.get(url, headers=headers)
@@ -133,16 +98,6 @@ def getNodeAllAuthors_App2():
         return(authors)
     else: return ([])
 
-def getNodeAllAuthors_big():
-    url = "https://bigger-yoshi.herokuapp.com/api/authors"
-    response = requests.get(url, headers=big_headers())
-    text = response.json()
-    items = text["items"]
-    
-    status_code = response.status_code
-    return items
-
-
 def checkDisplayName(list, displayName):
     author_list = []
     for item in list:
@@ -151,13 +106,11 @@ def checkDisplayName(list, displayName):
     return author_list
     
 def getRemoteAuthorsDisplayName(displayName):
-    author1 = checkDisplayName(getNodeAllAuthors_Yoshi(), displayName)
     author2 = checkDisplayName(getNodeAllAuthors_App2(), displayName)
     # author3 = checkDisplayName(getNodeAllAuthors_distro(), displayName) 
     # author4 = checkDisplayName(getNodeAllAuthors_P2(), displayName)
-    author5 = checkDisplayName(getNodeAllAuthors_big(), displayName)
-    print(author1, author2, author5)
-    authorList = author1 + author2  + author5
+    print(author2)
+    authorList = author2
     print(authorList)
     return authorList
 
@@ -176,19 +129,13 @@ def checkId(list, id):
     return author, found
 
 def getRemoteAuthorsById(id):
-    author1, found = checkId(getNodeAllAuthors_Yoshi(), id)
+
+    author2, found = checkId(getNodeAllAuthors_App2(), id)
     if found == False:
-        author2, found = checkId(getNodeAllAuthors_App2(), id)
-        if found == False:
-            author5, found = checkId(getNodeAllAuthors_big(),id)
-            if found == False:
-                return "author not found", False
-            else: 
-                return author5
-        else:
-            return author2, True
+        return "author not found", False
     else:
-        return author1, True
+        return author2, True
+
     
 def clean_author(author):
     if type(author) is dict:
